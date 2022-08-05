@@ -145,16 +145,16 @@ def get_args():
     parser.add_argument("--outfile",
                         default="blockplot.pdf", help="output file name")
     parser.add_argument("--similarity",
-                        default="Pairwise Similarity", \
+                        default="Pairwise Similarity",
                         help="Similarity metric has been used for similarity measurement")
     parser.add_argument("--orderby",
-                        default="similarity", \
+                        default="similarity",
                         help="Order the significant association by similarity, pvalue, or qvalue")
     parser.add_argument("--only-pair-features",
                         dest='only_pair_features',
                         action="store_true",
-                        default="similarity", \
-                        help="only common features will be shown in a paired order, usefull for pairwise associations")
+                        default="similarity",
+                        help="only common features will be shown in a paired order, useful for pairwise associations")
 
     return parser.parse_args()
 
