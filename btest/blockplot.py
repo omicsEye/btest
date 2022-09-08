@@ -2,11 +2,8 @@
 
 """
 Adopted from hallagram written by:
-
-Grand summary of HAllA output as heatmap figure
-===============================================
 Author: Eric Franzosa (eric.franzosa@gmail.com)
-        Gholamali Rahnavard (gholamali.rahnavard@gmail.com)
+        Ali Rahnavard (gholamali.rahnavard@gmail.com)
 """
 
 import os
