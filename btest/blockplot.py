@@ -168,12 +168,11 @@ def get_order(path):
                 break
     return [row_order, col_order]
 
-
-def load_order_table(p_table, p_tree, associations):
+def load_order_table(p_table, associations, p_tree = None):
     allowed_rowheads = {k for items in associations for k in items[1]}
     allowed_colheads = {k for items in associations for k in items[2]}
     simtable = Table(p_table)
-    row_order, col_order = get_order(p_tree)
+    row_order, col_order = simtable.rowheads, simtable.colheads # get_order(p_tree)
 
     # reorder the rows
     row_order = [simtable.rowmap[k] for k in row_order if k in simtable.rowmap and k in allowed_rowheads]
@@ -187,13 +186,12 @@ def load_order_table(p_table, p_tree, associations):
     simtable.update()
     return simtable
 
-
-def load_associations(path, largest=None, strongest=None, orderby='similarity'):
+def load_associations(path, largest=None, strongest=100, orderby='similarity'):
     pairs = []
-    dic_order = {'pvalue': 3, 'qvalue': 4, 'similarity': 5}
+    dic_order = {'pvalue': 3, 'similarity': 4, 'qvalue': 5, }
     with open(path) as fh:
         for row in csv.reader(fh, dialect="excel-tab"):
-            if "association" not in row[0]:
+            if row[0] !='':
                 pairs.append([row[0], row[1].split(";"), row[2].split(";"), row[3], row[4], row[5]])
     if largest is not None and strongest is not None:
         sys.exit("Can only specify one of LARGEST and STRONGEST")
@@ -322,7 +320,7 @@ def plot(simtable, associations, cmap, mask, axlabels, outfile, similarity):
                 edgecolor="black",
                 linewidth=c_line_width,
                 clip_on=False,
-            )
+                )
         )
         # label
         text = str(number)
@@ -331,7 +329,7 @@ def plot(simtable, associations, cmap, mask, axlabels, outfile, similarity):
         size = int(size)
         text = ax.text(  # np.mean( [x1, x2] )+0.5+c_label_shift*size,
             np.mean([x1, x2]) + .75 + c_label_shift * size if (
-                        len(row_items) % 2 != 0 and len(row_items) > 1 and len(col_items) > 1) else \
+                    len(row_items) % 2 != 0 and len(row_items) > 1 and len(col_items) > 1) else \
                 np.mean([x1, x2]) + .5 + c_label_shift * size if len(row_items) == 1 else np.mean(
                     [x1, x2]) + 0.5 + c_label_shift * size,
             np.mean([y1, y2]) + 0.5 + c_label_shift * size,
@@ -341,7 +339,7 @@ def plot(simtable, associations, cmap, mask, axlabels, outfile, similarity):
             ha="center",
             va="center",
             weight="bold",
-        )
+            )
         text.set_path_effects([
             path_effects.Stroke(linewidth=c_outline_width, foreground='black'),
             path_effects.Normal(),
@@ -362,6 +360,17 @@ def plot(simtable, associations, cmap, mask, axlabels, outfile, similarity):
 
 def main():
     args = get_args()
+    # associations = load_associations(path = outputpath + '/within_X.tsv')
+    # simtable = load_order_table(outputpath + '/simtable_X.tsv', associations)
+    # plot(
+    #     simtable,
+    #     associations,
+    #     cmap="RdBu_r",
+    #     mask=False,
+    #     axlabels=["",""],
+    #     outfile="/Users/rah/Documents/omicsEye/btest/demo/btest_output/blockplot.pdf",
+    #     similarity="Spearman"
+    # )
     associations = load_associations(
         args.associations,
         largest=args.largest,
