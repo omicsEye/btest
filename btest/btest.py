@@ -190,8 +190,8 @@ def btest(X_path, Y_path,
           ):
     # set the parameter to config file
     dataX , dataY = utils.read_data(X_path, Y_path)
-    within_X, within_Y, X_Y, Correlation = utils.corr_paired_data(dataX, dataY, method=method, fdr=fdr)
-    utils.write_results(within_X, within_Y, X_Y, Correlation, outputpath)
+    within_X, within_Y, X_Y, rho_X, rho_Y, rho_X_Y = utils.corr_paired_data(dataX, dataY, method=method, fdr=fdr)
+    utils.write_results(within_X, within_Y, X_Y, rho_X, rho_Y, rho_X_Y, outputpath)
     if plot:
         associations = blockplot.load_associations(path=outputpath + '/X_Y.tsv')
         simtable = blockplot.load_order_table(outputpath + '/simtable.tsv', associations)
@@ -205,7 +205,7 @@ def btest(X_path, Y_path,
             similarity="Spearman"
         )
 
-    return within_X, within_Y, X_Y, Correlation
+    return within_X, within_Y, X_Y, rho_X, rho_Y, rho_X_Y
 
 def main():
     # Parse arguments from command line

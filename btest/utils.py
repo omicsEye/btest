@@ -63,7 +63,6 @@ def btest_corr(df, method='spearman'):
         rho_long_format = rho.stack().reset_index().rename(columns={'level_0':'Feature_1','level_1':'Feature_2', 0:'Correlation'})
         results = pd.concat([pval_long_format, rho_long_format["Correlation"]], axis=1)
         results['Not_NAs'] = 'nan'
-    print("Run time: ", rho_excution_time)
 
     return results
 
@@ -101,7 +100,6 @@ def corr_paired_data(dataX, dataY, method= 'pearson', fdr=0.1):
 
     start_time = time.time()
     results = btest_corr(df)
-    rho_excution_time = time.time() - start_time
 
     within_X = results[results["Feature_1"].isin(dataX.index)]
     within_X = within_X[within_X["Feature_2"].isin(dataX.index)]
@@ -140,6 +138,8 @@ def corr_paired_data(dataX, dataY, method= 'pearson', fdr=0.1):
     within_Y = within_Y.sort_values(['pval', 'Correlation'],
                                     ascending = [True, False])
 
+    rho_excution_time = time.time() - start_time
+    print("Run time: ", rho_excution_time)
     return within_X, within_Y, X_Y, rho_X, rho_Y, rho_X_Y
 
 
@@ -147,7 +147,7 @@ def write_results(within_X, within_Y, X_Y, rho_X, rho_Y, rho_X_Y, outputpath):
     os.makedirs(outputpath, exist_ok=True)
     X_Y.to_csv(outputpath + '/X_Y.tsv', sep="\t")
     rho_X.to_csv(outputpath + '/simtable_X.tsv', sep="\t")
-    rho_X.to_csv(outputpath + '/simtable_Y.tsv', sep="\t")
+    rho_Y.to_csv(outputpath + '/simtable_Y.tsv', sep="\t")
     rho_X_Y.to_csv(outputpath + '/simtable.tsv', sep="\t")
     within_X.to_csv(outputpath + '/within_X.tsv', sep="\t")
     within_Y.to_csv(outputpath + '/within_Y.tsv', sep="\t")
