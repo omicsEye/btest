@@ -1,13 +1,13 @@
 # btest #
 
-Block-wise association testing (btest) is a method for general purpose,  and well-powered association discovery in 
-paired multi-omic datasets. 
+btest: a method to link, rank, and visualize associations among omics features across multi-omics datasets
+The tool is for general purpose,  and well-powered association discovery in paired multi-omic datasets. 
 
 ----
 
 **Citation:**
 
-Bahar Sayoldin, Keith A. Crandall,  Ali Rahnavard, *btest: link, rank, and visulize associations among omics features across multi-omics datasets* [https://rahnavard.org/btest](https://rahnavard.org/btest)
+Bahar Sayoldin, Keith A. Crandall,  Ali Rahnavard, *btest: link, rank, and visualize associations among omics features across multi-omics datasets* [https://rahnavard.org/btest](https://rahnavard.org/btest)
 
 * For installation and a quick demo, read the [Initial Installation]((#initial-installation))
 
@@ -120,49 +120,131 @@ enable high-sensitivity discovery of linear and non-linear associations in high-
 
 #### Installing from source ####
 
-1. Download btest
-You can download the latest btest release or the development version. The source contains example files. If installing with pip, it is optional first to download the btest source.
+## INSTALLATION ##
+* First install *conda*  
+Go to the [Anaconda website](https://www.anaconda.com/) and download the latest version for your operating system.  
+* For Windows users: DO NOT FORGET TO ADD CONDA TO your system PATH*
+* Second is to check for conda availability  
+open a terminal (or command line for Windows users) and run:
+```
+conda --version
+```
+it should out put something like:
+```
+conda 4.9.2
+```
+<span style="color:#fc0335">if not, you must make *conda* available to your system for further steps.</span>
+if you have problems adding conda to PATH, you can find instructions [here](https://docs.anaconda.com/anaconda/user-guide/faq/).  
 
-Option 1: Latest Release (Recommended)
+### Windows Linux Mac ###
+If you are **NOT** using an **Apple M1 MAC** please go to the [Apple M1 MAC](#apple-m1-mac) for installation instructions.  
+<span style="color:#033C5A">*If you have a working conda on your system, you can safely skip to step three*</span>.
+1) Create a new conda environment (let's call it btest_env) with the following command:
+```
+conda create --name btest_env python=3.8
+```
+2) Activate your conda environment:
+```commandline
+conda activate btest_env 
+```
+3) Install *btest*:
+you can directly install if from GitHub:
+```commandline
+python -m pip install git+https://github.com/omicsEye/btest
+```
+### Apple M1 MAC ###
+1) Update/install Xcode Command Line Tools
+  ```commandline
+  xcode-select --install
+  ```
+2) Install [Brew](https://brew.sh/index_fr)
+  ```commandline
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  ```
+3) Install libraries for brew
+  ```commandline
+  brew install cmake libomp
+  ```
+4) Install miniforge
+  ```commandline
+  brew install miniforge
+  ```
+5) Close the current terminal and open a new terminal
+6) Create a new conda environment (let's call it btest_env) with the following command:
+  ```commandline
+  conda create --name btest_env python=3.8
+  ```
+7) Activate the conda environment
+  ```commandline
+  conda activate btest_env
+  ```
+8) Install packages from Conda
+  ```commandline
+  conda install numpy scipy scikit-learn==0.23.2
+  ```
+  Then
+  ```commandline
+  conda install lightgbm
+  pip install xgboost
+  ```
+9) Finally, install *btest*:
+you can directly install if from GitHub:
+```commandline
+python -m pip install git+https://github.com/omicsEye/btest
+```
 
-* [btest.tar.gz](https://pypi.python.org/pypi/btest) and unpack the latest release of btest.
+------------------------------------------------------------------------------------------------------------------------------
 
-Option 2: Development Version
+# Getting Started with btest #
 
-* Create a clone of the repository: 
-    
-	``$ git clone https://github.com/omicsEye/btest.git ``
+## Test btest ##
 
-	Note: Creating a clone of the repository requires [Git](https://git-scm.com/) to be installed. Once the clone is created, you can always update to the latest version of the repository with `` $ git pull ``.
+To test if btest is installed correctly, you may run the following command in the terminal:
 
+```#!cmd
+btest -h
+```
+Which yields btest command line options.
+```commandline
+usage: btest [-h] [--version] -X <input_dataset_1.txt> [-Y <input_dataset_2.txt>] -o <output> [-m {nmi,ami,mic,dmic,dcor,pearson,spearman,r2,chi,mi}] [--fdr FDR] [-v VERBOSE] [--diagnostics-plot] [--header] [--format-feature-names] [-s SEED]
 
-2. Move to the btest directory
+block-wise association testing
 
-    * ``$ cd $btest_PATH `` 
-
-3. Install btest
-
-    * ``$ python setup.py install.''
-    *  This command will automatically install btest and its dependencies.
-    * To overwrite existing installs of dependencies us "-U" to force update them. 
-    * If you do not have write permissions to '/usr/lib/,' then add the option "--user" to the btest install command. This will install the python package into subdirectories of '~/.local' on Linux. Please note when using the "--user" install option on some platforms, you might need to add '~/.local/bin/' to your $PATH as it might not be included by default. You will know if it needs to be added if you see the following message `btest: command not found` when trying to run btest after installing with the "--user" option.
-
-
-### 2. Test the install ###
+optional arguments:
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
+  -X <input_dataset_1.txt>
+                        first file: Tab-delimited text input file, one row per feature, one column per measurement
+                        [REQUIRED]
+  -Y <input_dataset_2.txt>
+                        second file: Tab-delimited text input file, one row per feature, one column per measurement
+                        [default = the first file (-X)]
+  -o <output>, --output <output>
+                        directory to write output files
+                        [REQUIRED]
+  -m {nmi,ami,mic,dmic,dcor,pearson,spearman,r2,chi,mi}, --metric {nmi,ami,mic,dmic,dcor,pearson,spearman,r2,chi,mi}
+                        metric to be used for similarity measurement
+                        [default = '']
+  --fdr FDR             Target FDR correction using BH approach
+  -v VERBOSE, --verbose VERBOSE
+                        additional output is printed
+  --diagnostics-plot    Diagnostics plot for associations 
+  --header              the input files contain a header line
+  --format-feature-names
+                        Replaces special characters and for OTUs separated  by | uses the known end of a clade
+  -s SEED, --seed SEED  a seed number to make the random permutation reproducible
+                        [default = 0,and -1 for random number]
+```
+### 2. Test the installation ###
 
 1. Test out the install with unit and functional tests
      * `` $ btest_test``
 
 ### 3. Try out a demo run ###
 
-**Option 1: **btest uses **Spearman** as similarity metric by default for continuous data.
-
-**Option 2: **btest uses **NMI** as similarity metric by default for mixed (categorical, continuous, and binary) data.
-
-Users can override the default by providing other similarity metric implemented in btest using `-m`.
 
 With btest installed you can try out a demo run using two sample synthetic datasets. 
-``$ btest -X examples/X_16_100.txt examples/Y_16_100.txt -o $OUTPUT_DIR --blockplot --diagnostics-plot``
+``$ btest -X demo/X_dataset.txt -Y demo/Y_dataset.txt -o $OUTPUT_DIR --fdr 0.1``
 
 The output from this demo run will be written to the folder $OUTPUT_DIR.
 
@@ -175,76 +257,6 @@ If you have already installed btest, using the [Initial Installation](#initial-i
 
 This command upgrades btest to the latest version and ignores updating btest's dependencies. 
 
-## How to run ##
-
-### Basic usage ###
-
-```
-$ btest -X $DATASET1 -Y $DATASET2 --output $OUTPUT_DIR --diagnostics-plot -m spearman
-```
-* If not provided by `-m spearman`, As all the features are continuous data, btest uses Spearman coefficient, as the default similarity metric for continuous data.*
-
-$DATASET1 and $DATASET2 = two input files that have the following format:
-
-1.  tab-delimited text file (txt or tsv format)
-2.  features are rows with mandatory row names 
-3.  samples are columns with optional columns names. If the columns are the same order and the same size between two datasets then column name is not required but recommended. Otherwise, the file should contain column names in the first row and start with `#` or user should provide option `--header` in the command line. 
-
-$OUTPUT_DIR = the output directory
-
-`--blockplot` is an option for visualizing the results as a blockplot
-`--diagnostics-plot` is an option to generate plots for each association
-`-m spearman` is an option to use spearman as similarity measurement as our datasets contain continuous data and we look for monotonic relationships in this case. 
-
-**Output files will be created:**
-
-1. $OUTPUT_DIR/assocaitions.txt
-	* the list of discovered associations 
-2. $OUTPUT_DIR/assoction_N 
-	* a list of plots each association where N is from 1 to number of discovered associations 
-3. $OUTPUT_DIR/similarity_table.txt
-        * as a matrix format file that contains similarity between individual features among two data sets.
-5. $OUTPUT_DIR/hypothesis_tree.txt 
-        * contains clusters that have been tested at different levels in the hypothesis tree.
-6. $OUTPUT_DIR/blockplot.pdf 
-        * a plot for a summary of associations.
-7. $OUTPUT_DIR/peformance.txt 
-        * includes the configuration that has been used (for reproducibility) and steps runtime.
-8. $OUTPUT_DIR/X_dataest.txt 
-        * first dataset that has been used after being processed.
-9. $OUTPUT_DIR/Y_dataest.txt 
-        * second dataset that has been used after being processed.
-10. $OUTPUT_DIR/circus_table.txt 
-        * input for Circus tool for visualization.
-11. $OUTPUT_DIR/all_association_results_one_by_one.txt 
-        * list of associations in individually paired features with p-value and q-value.	
-12. $OUTPUT_DIR/hierarchical_heatmap.pdf 
-        * btest produces two heatmaps on original datasets after parsing them(filtering features with low entropy or removing noncommon samples between two datasets).	
-
-### Setting for association types ###
-
-btest by default uses:
-
-* Spearman correlation for continuous data (appropriate metric monotonic and linear associations) and medoid for clusters decomposition.
-
-* Normalized mutual information (NMI) for mixed (categorical, continuous, and binary) data (appropriate metric any type of association) and medoid for clusters decomposition.
-
-| Association type     | Data type  | Similarity metric | Decomposition    |
-|----------------------|------------|-------------------|------------------|
-| Any                  | Any        | NMI               | Medoid, MCA      |
-| Linear or monotonic   | Continuous | Spearman          | Medoid, PCA, MCA |
-| Parabola (quadratic) | Continuous | NMI, dCor         | Medoid, MCA      |
-| L shape              | Any        | NMI               | Medoid, MCA      |
-| Step pattern         | Any        | NMI               | Medoid, MCA      | 
-
-### Demo runs ###
-
-To run the demo:
-
-`` $ btest -X examples/X_linear0_32_100.txt -Y examples/Y_linear0_32_100.txt -m spearman --output OUTPUT --diagnostics-plot ``
-
-
-$OUTPUT_DIR is the output directory
 
 
 ## Output files ##
@@ -310,29 +322,8 @@ btest produces a performance file to store user configuration settings. This con
 
 ```sh
 $ vi performance.txt
-btest version:	0.7.5
-Decomposition method: 	medoid
-Similarity method: 	spearman
-Hierarchical linkage method: 	average
-q: FDR cut-off : 	0.1
-FDR adjusting method : 	bh
-FDR using : 	level
-Applied stop condition : 	False
-Discretizing method : 	equal-area
-Permutation function: 	none
-Seed number: 	0
-Number of permutations iterations for estimating pvalues: 	1000
-Minimum entropy for filtering threshold : 	0.5
+btest version:	1.1.1
 
-Number of association cluster-by-cluster:	7
-Number of association feature-by-feature: 	186
-
-Hierarchical clustering time	0:00:11.115361
-Level-by-level hypothesis testing	0:00:02.486063
-number of performed permutation tests: 	845
-Summary statistics time	0.0033469200134277344
-Plotting results time	0:02:21.775510
-Total execution time	0:02:35.402486
 ```
 
 ## Tutorials ##
