@@ -65,17 +65,13 @@ enable high-sensitivity discovery of linear and non-linear associations in high-
 
 ## Features ##
 
-1. Generality: btest can handle datasets of mixed data types: categorical, binary, continuous, lexical (text strings with or without inherent order)
+1. Generality: btest can handle datasets from various omics profiles
 
-2. Efficiency: Rather than checking all possible associations, btest prioritizes computation such that only statistically promising candidate variables are tested in detail.
+2. Efficiency: design and implementation of function tend to work with large data
 
-3. Reliability: btest utilizes hierarchical false discovery correction to limit false discoveries and loss of statistical power attributed to multiple hypothesis testing.
+3. Reliability: btest utilizes multiple hypothesis testing in paired omics data.
 
-4. Extensibility: btest is extensible to use different methods so measurement in its steps.
-Similarity measurement it has the following metrics implemented: normalized mutual information (NMI), adjusted mutual information (AMI), mutual information (MI), maximum information coefficient (MIC), discretized mutual information as default, Spearman correlation, Pearson correlation, and distance correlation (DCOR).
-Dimension reduction, decomposition, method uses medoid of clusters as default, and also has principal component analysis (PCA), independent component analysis (ICA), multiple corresponding analysis (MCA), centroid of clusters, partial least square (PLS), canonical component analysis (CCA), kernel principal component analysis (KPCA) implemented as options.
-
-5. False discovery rate correction (FDR) methods are included: Benjamini–Hochberg(BH) as default, Benjamini–Yekutieli (BY), and Bonferroni.
+4. False discovery rate correction (FDR) methods are included: Benjamini–Hochberg(BH) as default, Benjamini–Yekutieli (BY), and Bonferroni.
 
 6. A simple user interface (single command driven flow)
 
