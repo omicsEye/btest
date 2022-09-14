@@ -50,17 +50,9 @@ try:
     import matplotlib.pyplot as plt
 except ImportError:
     sys.exit("Please install matplotlib")
-
-#  Load a btest module to check the installation
-# try:
-from . import store
-# except ImportError:
-#   sys.exit("CRITICAL ERROR: Unable to find the store module." +
-#       " Please check your btest install.")
-
-from . import utilities
-from . import stats
+from . import utils
 from . import config
+from . import blockplot
 
 
 def get_btest_base_directory():
@@ -76,7 +68,7 @@ def get_btest_base_directory():
     return btest_base_directory
 
 
-def check_requirements():
+def check_requirements(args):
     """
     Check requirements (file format, dependencies, permissions)
     """
@@ -86,7 +78,7 @@ def check_requirements():
     except ImportError:
         sys.exit("--- Please check your installation for pandas library")
     # Check that the output directory is writeable
-    output_dir = os.path.abspath(config.output_dir)
+    output_dir = os.path.abspath(args.output_dir)
     if not os.path.isdir(output_dir):
         try:
             print("Creating output directory: " + output_dir)
@@ -109,23 +101,13 @@ def check_requirements():
                  "Please select another directory.")
 
     print("Output files will be written to: " + output_dir)
-    if config.similarity_method == 'mic':
-        try:
-            import minepy
-        except ImportError:
-            sys.exit("--- Please check minepy installation for MIC library")
-    # if mca is chosen as decomposition method check if it's R package and dependencies are installed
-    if config.decomposition == 'mca':
-        try:
-            from rpy2 import robjects as ro
-            from rpy2.robjects import r
-            from rpy2.robjects.packages import importr
-            import rpy2.robjects.numpy2ri
-            rpy2.robjects.numpy2ri.activate()
-            ro.r('library(FactoMineR)')
-        except:
-            sys.exit("--- Please check R, rpy2,  and  FactoMineR installation for MCA library")
 
+def set_parameters(args):
+    '''
+    Set the user command line options to config file
+    to be used in the program
+    '''
+    config.output_dir = args.output_dir
 
 def parse_arguments(args):
     """
@@ -157,6 +139,19 @@ def parse_arguments(args):
         help="directory to write output files\n[REQUIRED]",
         metavar="<output>",
         required=True)
+    argp.add_argument(
+        "-m", "--metric",
+        dest="strMetric",
+        default='spearman',
+        choices=["nmi", "ami", "mic", "dmic", "dcor", "pearson", "spearman", "r2", 'chi', 'mi'],
+        help="metric to be used for similarity measurement\n[default = '']")
+
+    argp.add_argument(
+        "--fdr",
+        dest="fdr",
+        type=float,
+        default=0.1,
+        help="Target FDR correction using BH approach")
 
     argp.add_argument(
         "-v", "--verbose",
@@ -183,101 +178,35 @@ def parse_arguments(args):
         type=int,
         default=0,  # random.randint(1,10000),
         help="a seed number to make the random permutation reproducible\n[default = 0,and -1 for random number]")
-    argp.add_argument(
-        "-e", "--entropy",
-        dest="entropy_threshold",
-        type=float,
-        default=0.5,
-        help="Minimum entropy threshold to filter features with low information\n[default = 0.5]")
-    argp.add_argument(
-        "-e1", "--entropy1",
-        dest="entropy_threshold1",
-        type=float,
-        default=None,
-        help="Minimum entropy threshold for the first dataset \n[default = None]")
-    argp.add_argument(
-        "-e2", "--entropy2",
-        dest="entropy_threshold2",
-        type=float,
-        default=None,
-        help="Minimum entropy threshold for the second dataset \n[default = None]")
-    argp.add_argument(
-        "--missing-char",
-        dest="missing_char",
-        default='',
-        help="defines missing characters\n[default = '']")
-    argp.add_argument(
-        "--fill-missing",
-        dest="missing_method",
-        default=None,
-        choices=["mean", "median", "most_frequent"],
-        help="defines missing strategy to fill missing data.\nFor categorical data puts all missing data in one new category.")
+
     return argp.parse_args()
 
 
-def btest(X, Y,
-            output_dir='.',
-            e1=None, e2=None,
-            e=0.5,
-            missing_char='',
-            missing_method=None,
-            i=1000,
-            linkage_method='average',
-            discretizing='equal-freq',
-            m='',
-            btestgram=True, \
-            diagnostics_plot=True, \
-            header=False, format_feature_names=False, \
-            nproc=1, nbin=None, s=0, \
-            missing_char_category=False,
-            write_hypothesis_tree=False, t=''):
-    # set the paramater to config file
-    config.similarity_method = m.lower()
-    config.entropy_threshold = e
-    if e1 == None:
-        config.entropy_threshold1 = e
-    else:
-        config.entropy_threshold1 = e1
-    if e2 == None:
-        config.entropy_threshold2 = e
-    else:
-        config.entropy_threshold2 = e2
-    # otherwise use gpd as fast and accurate pvalue calculation approach
-    config.missing_char = missing_char
-    config.missing_method = missing_method
-    config.missing_char_category = missing_char_category
-    # load_input()
+def btest(X_path, Y_path,
+          outputpath,
+          method='spearman',
+          plot=True,
+          fdr= .1
+          ):
+    # set the parameter to config file
+    dataX , dataY = utils.read_data(X_path, Y_path)
+    within_X, within_Y, X_Y, Correlation = utils.corr_paired_data(dataX, dataY, method=method, fdr=fdr)
+    utils.write_results(within_X, within_Y, X_Y, Correlation, outputpath)
+    if plot:
+        associations = blockplot.load_associations(path=outputpath + '/X_Y.tsv')
+        simtable = blockplot.load_order_table(outputpath + '/simtable.tsv', associations)
+        blockplot.plot(
+            simtable,
+            associations,
+            cmap="RdBu_r",
+            mask=False,
+            axlabels=["", ""],
+            outfile=outputpath + "/blockplot.pdf",
+            similarity="Spearman"
+        )
 
-    # read  input files
-    dataX = pd.read_table(dataX, index_col=0, header=0)
-    # print(data.shape)
-    # print(data.index)
-    # print(data.columns)
+    return within_X, within_Y, X_Y, Correlation
 
-    dataY = pd.read_table(dataY, index_col=0, header=0)
-    #   print(data.index)
-    # print(metadata.index)
-    ind = dataY.index.intersection(dataX.index)
-
-    if len(ind) != data.shape[0]:
-        print("the data and metadata have different number of rows and number of common rows is: ", len(ind))
-        print("The number of missing metadata are: ", data.shape[0] - len(ind))
-        diff_rows = data.index.difference(metadata.index)
-        # print (diff_rows)
-        empty_section_metadata = pd.DataFrame(index=diff_rows, columns=metadata.columns)
-        metadata = pd.concat([metadata, empty_section_metadata])
-    dataY = dataY.loc[dataX.index, :]
-    check_requirements()
-    doTest(dataX, dataY)
-    return
-def doTest(dataX, dataY):
-
-    df = pd.concat([dataX, dataY])
-    rho = df.corr()
-    pval = df.corr(method=lambda x, y: pearsonr(x, y)[1]) - np.eye(*rho.shape)
-    rho = pd.melt(rho)
-    pval = pd.melt(pval)
-    result = pd.concat([df1, df3], axis=1)
 def main():
     # Parse arguments from command line
     args = parse_arguments(sys.argv)
@@ -286,10 +215,10 @@ def main():
     set_parameters(args)
 
     # check the requiremnts based on need for parameters
-    check_requirements()
+    check_requirements(args)
 
     # run btest approach
-    doTest(dataX, dataY)
+    results = btest(X_path=args.X, Y_path=args.Y, outputpath=args.output_dir, method=args.strMetric, fdr=args.fdr)
 
 
 if __name__ == '__main__':

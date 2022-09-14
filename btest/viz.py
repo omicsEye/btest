@@ -25,7 +25,7 @@ from matplotlib.pyplot import xlabel
 from itertools import product
 from matplotlib import font_manager
 from . import config
-from . import stats
+
 import warnings
 
 with warnings.catch_warnings():

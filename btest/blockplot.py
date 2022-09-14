@@ -185,11 +185,11 @@ def load_order_table(p_table, associations, p_tree = None):
 
 def load_associations(path, largest=None, strongest=100, orderby='similarity'):
     pairs = []
-    dic_order = {'pvalue': 3, 'similarity': 4, 'qvalue': 5, }
+    dic_order = {'pvalue': 3, 'similarity': 4, 'qvalue': 6, }
     with open(path) as fh:
         for row in csv.reader(fh, dialect="excel-tab"):
             if row[0] !='':
-                pairs.append([row[0], row[1].split(";"), row[2].split(";"), row[3], row[4], row[5]])
+                pairs.append([row[0], row[1].split(";"), row[2].split(";"), row[3], row[4], row[6]])
     if largest is not None and strongest is not None:
         sys.exit("Can only specify one of LARGEST and STRONGEST")
     elif largest is not None:
