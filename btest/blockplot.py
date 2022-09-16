@@ -185,7 +185,7 @@ def load_order_table(p_table, associations, p_tree = None):
 
 def load_associations(path, largest=None, strongest=100, orderby='similarity'):
     pairs = []
-    dic_order = {'pvalue': 3, 'similarity': 4, 'qvalue': 6, }
+    dic_order = {'pvalue': 3, 'similarity': 4, 'qvalue': 5}
     with open(path) as fh:
         for row in csv.reader(fh, dialect="excel-tab"):
             if row[0] !='':
