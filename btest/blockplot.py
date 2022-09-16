@@ -125,12 +125,12 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("simtable",
                         help="table of pairwise similarity scores")
-    parser.add_argument("tree",
-                        help="hypothesis tree (for getting feature order)")
+    #parser.add_argument("tree",
+    #                    help="hypothesis tree (for getting feature order)")
     parser.add_argument("associations",
                         help="btest associations")
     parser.add_argument("--strongest",
-                        default=None, type=int, help="isolate the N strongest associations")
+                        default=100, type=int, help="isolate the N strongest associations")
     parser.add_argument("--largest",
                         default=None, type=int, help="isolate the N largest associations")
     parser.add_argument("--mask",
@@ -372,7 +372,8 @@ def main():
         args.associations,
         largest=args.largest,
         strongest=args.strongest, orderby=args.orderby)
-    simtable = load_order_table(args.simtable, args.tree, associations)
+    simtable = load_order_table(args.simtable, associations)
+
     plot(
         simtable,
         associations,

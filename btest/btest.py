@@ -152,6 +152,12 @@ def parse_arguments(args):
         type=float,
         default=0.1,
         help="Target FDR correction using BH approach")
+    argp.add_argument(
+        "--var",
+        dest="min_var",
+        type=float,
+        default=0.0,
+        help="Minimum variation to keep a feature in tests")
 
     argp.add_argument(
         "-v", "--verbose",
@@ -186,11 +192,13 @@ def btest(X_path, Y_path,
           outputpath,
           method='spearman',
           plot=True,
-          fdr= .1
+          fdr=0.1,
+          min_var=0.0
           ):
     # set the parameter to config file
-    dataX , dataY = utils.read_data(X_path, Y_path)
-    within_X, within_Y, X_Y, rho_X, rho_Y, rho_X_Y = utils.corr_paired_data(dataX, dataY, method=method, fdr=fdr)
+    dataX , dataY = utils.readData(X_path, Y_path)
+    dataAll, featuresX, featuresY = utils.dataProcess(dataX, dataY, min_var=min_var)
+    within_X, within_Y, X_Y, rho_X, rho_Y, rho_X_Y = utils.corr_paired_data(dataAll, featuresX, featuresY, method=method, fdr=fdr)
     utils.write_results(within_X, within_Y, X_Y, rho_X, rho_Y, rho_X_Y, outputpath)
     if plot:
         associations = blockplot.load_associations(path=outputpath + '/X_Y.tsv')
@@ -218,7 +226,7 @@ def main():
     check_requirements(args)
 
     # run btest approach
-    results = btest(X_path=args.X, Y_path=args.Y, outputpath=args.output_dir, method=args.strMetric, fdr=args.fdr)
+    results = btest(X_path=args.X, Y_path=args.Y, outputpath=args.output_dir, method=args.strMetric, fdr=args.fdr, min_var=args.min_var)
 
 
 if __name__ == '__main__':
