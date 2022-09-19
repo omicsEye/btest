@@ -15,6 +15,7 @@ from scipy.stats import spearmanr
 from btest import config
 import itertools
 
+
 def readData(X_path, Y_Path):
     dataX = pd.read_table(X_path, index_col=0, header=0)
     dataY = pd.read_table(Y_Path, index_col=0, header=0)
@@ -159,6 +160,7 @@ def bh(p, q):
 
 
 def btest_corr(dataAll, featuresX, featuresY, method='spearman', fdr=0.1):
+    corrleationMethod = corrMethod[method]
     iRow = len(dataAll)
     iCol = len(dataAll)
     tests = []
@@ -173,7 +175,7 @@ def btest_corr(dataAll, featuresX, featuresY, method='spearman', fdr=0.1):
                 #X = Y[~nas]
                 #Y = Y[~nas]
                 #new_X, new_Y = remove_pairs_with_a_missing(X, Y)
-                correlation, pval = spearman(X, Y)
+                correlation, pval = corrleationMethod(X, Y)
                 tests.append([features[i],features[j],pval, correlation, not_na])
     results = pd.DataFrame(tests, columns = ['Feature_1','Feature_2','pval', 'Correlation', 'Not_NAs'])
     return results
@@ -250,6 +252,9 @@ def spearman(x, y):
         return(0,1)
     corr, pval = spearmanr(x, y)
     return(corr, pval)
+
+corrMethod = {"spearman" : spearman, "pearson": pearson}
+
 
 
 
