@@ -158,7 +158,6 @@ def parse_arguments(args):
         type=float,
         default=0.0,
         help="Minimum variation to keep a feature in tests")
-
     argp.add_argument(
         "-v", "--verbose",
         dest="verbose",
