@@ -140,11 +140,11 @@ def parse_arguments(args):
         metavar="<output>",
         required=True)
     argp.add_argument(
-        "-m", "--metric",
+        "-m",
         dest="strMetric",
         default='spearman',
-        choices=["nmi", "ami", "mic", "dmic", "dcor", "pearson", "spearman", "r2", 'chi', 'mi'],
-        help="metric to be used for similarity measurement\n[default = '']")
+        choices=[ "pearson", "spearman", "kendall"],
+        help="metric to be used for similarity measurement\n[default = 'spearman']")
 
     argp.add_argument(
         "--fdr",

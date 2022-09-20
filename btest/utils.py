@@ -1,7 +1,7 @@
 import os
 import sys
 import csv
-from scipy.stats import pearsonr, spearmanr
+from scipy.stats import pearsonr, spearmanr, kendalltau
 import numpy as np
 import pandas as pd
 import time
@@ -253,7 +253,20 @@ def spearman(x, y):
     corr, pval = spearmanr(x, y)
     return(corr, pval)
 
-corrMethod = {"spearman" : spearman, "pearson": pearson}
+def pearson(x, y):
+    x, y = remove_missing_values(x, y)
+    if (np.unique(x).shape[0] == 1 or np.unique(y).shape[0] == 1):
+        return(0,1)
+    corr, pval = pearsonr(x, y)
+    return(corr, pval)
+def kendall(x,y):
+    x, y = remove_missing_values(x, y)
+    if (np.unique(x).shape[0] == 1 or np.unique(y).shape[0] == 1):
+        return (0, 1)
+    corr, pval = kendalltau(x, y)
+    return (corr, pval)
+
+corrMethod = {"spearman" : spearman, "pearson": pearson, "kendall":kendall}
 
 
 

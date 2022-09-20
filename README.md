@@ -71,7 +71,7 @@ enable high-sensitivity discovery of linear and non-linear associations in high-
 
 3. Reliability: btest utilizes multiple hypothesis testing in paired omics data.
 
-4. False discovery rate correction (FDR) methods are included: Benjamini–Hochberg(BH) as default, Benjamini–Yekutieli (BY), and Bonferroni.
+4. False discovery rate correction (FDR) using Benjamini–Hochberg(BH).
 
 6. A simple user interface (single command driven flow)
 
@@ -105,18 +105,6 @@ enable high-sensitivity discovery of linear and non-linear associations in high-
 
 
 ### 1. Install btest ###
-
-#### Installing with pip ####
-
-1. Install btest
-    * `` $ pip install btest ``
-    * This command will automatically install btest and its dependencies.
-    * To overwrite existing installs of dependencies use "-U" to force update them. 
-    * To use the existing version of dependencies use "--no-dependencies." 
-    * If you do not have write permissions to '/usr/lib/,' then add the option "--user" to the btest install command. Using this option will install the python package into subdirectories of '~/.local' on Linux. Please note when using the "--user" install option on some platforms, you might need to add '~/.local/bin/' to your $PATH as default might not include it. You will know if it needs to be added if you see the following message `btest: command not found` when trying to run btest after installing with the "--user" option.
-    * If you use Windows operating system you can install it with administrator permission easily (please open a terminal with administrator permission and the rest is the same). 
-    * If you have both Python 2 and Python 3 on your machine then use pip3 for Python 3.
-
 
 #### Installing from source ####
 
@@ -193,6 +181,16 @@ you can directly install if from GitHub:
 python -m pip install git+https://github.com/omicsEye/btest
 ```
 
+#### Installing with pip ####
+
+* $ pip install btest ``
+* This command will automatically install btest and its dependencies.
+* To overwrite existing installations of dependencies use "-U" to force update them. 
+* To use the existing version of dependencies use "--no-dependencies." 
+* If you do not have write permissions to '/usr/lib/,' then add the option "--user" to the btest install command. Using this option will install the python package into subdirectories of '~/.local' on Linux. Please note when using the "--user" install option on some platforms, you might need to add '~/.local/bin/' to your $PATH as default might not include it. You will know if it needs to be added if you see the following message `btest: command not found` when trying to run btest after installing with the "--user" option.
+* If you use Windows operating system you can install it with administrator permission easily (please open a terminal with administrator permission and the rest is the same). 
+
+
 ------------------------------------------------------------------------------------------------------------------------------
 
 # Getting Started with btest #
@@ -222,9 +220,9 @@ optional arguments:
   -o <output>, --output <output>
                         directory to write output files
                         [REQUIRED]
-  -m {nmi,ami,mic,dmic,dcor,pearson,spearman,r2,chi,mi}, --metric {nmi,ami,mic,dmic,dcor,pearson,spearman,r2,chi,mi}
+  -m {spearman, pearson, kendall },
                         metric to be used for similarity measurement
-                        [default = '']
+                        [default = 'spearman']
   --fdr FDR             Target FDR correction using BH approach
   -v VERBOSE, --verbose VERBOSE
                         additional output is printed
