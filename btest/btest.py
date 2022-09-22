@@ -34,6 +34,7 @@ import math
 import random
 from scipy.stats import pearsonr
 import numpy as np
+import pandas as pd
 
 # Test if numpy is installed
 try:
@@ -195,10 +196,16 @@ def btest(X_path, Y_path,
           min_var=0.0
           ):
     # set the parameter to config file
-    dataX , dataY = utils.readData(X_path, Y_path)
-    dataAll, featuresX, featuresY = utils.dataProcess(dataX, dataY, min_var=min_var)
-    within_X, within_Y, X_Y, rho_X, rho_Y, rho_X_Y = utils.corr_paired_data(dataAll, featuresX, featuresY, method=method, fdr=fdr)
-    utils.write_results(within_X, within_Y, X_Y, rho_X, rho_Y, rho_X_Y, outputpath)
+    start_time = time.time()
+    dataX , dataY, featuresX, featuresY  = utils.readData(X_path, Y_path, min_var=min_var)
+    within_X = utils.btest_corr(dataX, featuresX, method=method, fdr=fdr, Type='withinX')
+    within_Y  = utils.btest_corr(dataY, featuresY, method=method, fdr=fdr, Type='withinY')
+    dataAll = np.concatenate((dataX, dataY), axis=0)
+    X_Y = utils.btest_corr(dataAll, featuresX, featuresY, method=method, fdr=fdr, Type='X_Y')
+
+    utils.write_results(within_X, 'within_X', outputpath)
+    utils.write_results(within_Y, 'within_Y', outputpath)
+    utils.write_results(X_Y, 'simtable', outputpath)
     if plot:
         associations = blockplot.load_associations(path=outputpath + '/X_Y.tsv')
         simtable = blockplot.load_order_table(outputpath + '/simtable.tsv', associations)
@@ -211,8 +218,10 @@ def btest(X_path, Y_path,
             outfile=outputpath + "/blockplot.pdf",
             similarity="Spearman"
         )
+    run_time = time.time() - start_time
+    print("Run time: ", run_time)
 
-    return within_X, within_Y, X_Y, rho_X, rho_Y, rho_X_Y
+    return within_X, within_Y, X_Y
 
 def main():
     # Parse arguments from command line

@@ -16,7 +16,7 @@ from btest import config
 import itertools
 
 
-def readData(X_path, Y_Path):
+def readData(X_path, Y_Path, min_var=0.5):
     dataX = pd.read_table(X_path, index_col=0, header=0)
     dataY = pd.read_table(Y_Path, index_col=0, header=0)
     dataX = dataX.astype(float)
@@ -30,10 +30,6 @@ def readData(X_path, Y_Path):
 
     dataX = dataX.loc[:,~dataX.columns.duplicated()]
     dataY = dataY.loc[:,~dataY.columns.duplicated()]
-
-    return dataX, dataY
-
-def dataProcess(dataX, dataY, min_var =0.0):
 
     l1_before = len(dataX.columns)
     l2_before = len(dataY.columns)
@@ -74,14 +70,14 @@ def dataProcess(dataX, dataY, min_var =0.0):
         print(
             "--- %d features with variation equal or less than %.3f have been removed from the second dataset " % (
                 l2_before - l2_after, min_var))
-    #valuesX = dataX.values
-    #valuesY = dataY.values
-    dataAll = pd.concat([dataX, dataY])
+    valuesX = dataX.values
+    valuesY = dataY.values
+    #dataAll = pd.concat([dataX, dataY])
     featuresX = list(dataX.index)
     featuresY = list(dataY.index)
-    dataAll = dataAll.values
+    #dataAll = dataAll.values
 
-    return dataAll, featuresX, featuresY
+    return valuesX, valuesY, featuresX, featuresY
 
 def btest_corr_pandas(df, method='spearman', pval=False):
     results = pd.DataFrame()
@@ -159,78 +155,46 @@ def bh(p, q):
     return p_adust, p_threshold
 
 
-def btest_corr(dataAll, featuresX, featuresY, method='spearman', fdr=0.1):
+def btest_corr(dataAll, features, features_y=None, method='spearman', fdr=0.1, Type='X_Y'):
     corrleationMethod = corrMethod[method]
-    iRow = len(dataAll)
-    iCol = len(dataAll)
+    iRow = list(range(0, len(features)))
+    if Type=='X_Y':
+        iCol = list(range(len(features), len(features)+len(features_y)-1))
+        features_y = features + features_y
+    else:
+        features_y = features
+        iCol = list(range(len(features)))
     tests = []
-    features = featuresX + featuresY
-    for i in list(range(iRow)):
-        for j in list(range(iCol)):
+    for i in iRow:
+        for j in iCol:
             if i<=j:
+                #print(i, j)
                 X = dataAll[i]
-                Y=  dataAll[j]
+                Y = dataAll[j]
                 nas = np.logical_or(X != X, Y != Y)
                 not_na = sum(~nas)
                 #X = Y[~nas]
                 #Y = Y[~nas]
                 #new_X, new_Y = remove_pairs_with_a_missing(X, Y)
                 correlation, pval = corrleationMethod(X, Y)
-                tests.append([features[i],features[j],pval, correlation, not_na])
-    results = pd.DataFrame(tests, columns = ['Feature_1','Feature_2','pval', 'Correlation', 'Not_NAs'])
+                tests.append([features[i], features_y[j], pval, correlation, not_na])
+    results = pd.DataFrame(tests, columns=['Feature_1','Feature_2','pval', 'Correlation', 'Not_NAs'])
+
+    p_adust, p_threshold = bh(results["pval"].values, fdr)
+
+    results["P_adusted"] = p_adust
+    results["bh_fdr_threshold"] = p_threshold
+    results['Type'] = Type
+    results = results.sort_values(['pval', 'Correlation'],
+                          ascending=[True, False])
     return results
 
-def corr_paired_data(dataAll, featuresX, featuresY, method='spearman', fdr=0.1):
-    start_time = time.time()
-    results = btest_corr(dataAll, featuresX, featuresY, method=method)
-
-    within_X = results[results["Feature_1"].isin(featuresX)]
-    within_X = within_X[within_X["Feature_2"].isin(featuresX)]
-    within_X = within_X[within_X["Feature_1"] != within_X["Feature_2"]]
-
-    within_Y = results[results["Feature_1"].isin(featuresY)]
-    within_Y = within_Y[within_Y["Feature_2"].isin(featuresY)]
-    within_Y = within_Y[within_Y["Feature_1"] != within_Y["Feature_2"]]
-
-    X_Y = results[~np.logical_or(results["Feature_1"].isin(featuresY), results["Feature_2"].isin(featuresX))]
-
-    rho_X_Y = pd.pivot(X_Y, index="Feature_1", columns = "Feature_2",values = 'Correlation') #Reshape from long to wide
-    rho_X = pd.pivot(within_X, index="Feature_1", columns = "Feature_2",values = 'Correlation') #Reshape from long to wide
-    rho_Y = pd.pivot(within_Y, index="Feature_1", columns = "Feature_2",values = 'Correlation') #Reshape from long to wide
-
-    within_X_p_adust, within_X_p_threshold = bh(within_X["pval"].values, fdr)
-    within_Y_p_adust, within_Y_p_threshold = bh(within_Y["pval"].values, fdr)
-    X_Y_p_adust, X_Y_p_threshold = bh(X_Y["pval"].values, fdr)
-
-    within_X["P_adusted"] = within_X_p_adust
-    within_X["bh_fdr_threshold"] = within_X_p_threshold
-
-    within_Y["P_adusted"] = within_Y_p_adust
-    within_Y["bh_fdr_threshold"] = within_Y_p_threshold
-
-    X_Y["P_adusted"] = X_Y_p_adust
-    X_Y["bh_fdr_threshold"] = X_Y_p_threshold
-
-    X_Y = X_Y.sort_values(['pval', 'Correlation'],
-                          ascending=[True, False])
-    within_X = within_X.sort_values(['pval', 'Correlation'],
-                                    ascending=[True, False])
-    within_Y = within_Y.sort_values(['pval', 'Correlation'],
-                                    ascending=[True, False])
-
-    rho_excution_time = time.time() - start_time
-    print("Run time: ", rho_excution_time)
-    return within_X, within_Y, X_Y, rho_X, rho_Y, rho_X_Y
-
-
-def write_results(within_X, within_Y, X_Y, rho_X, rho_Y, rho_X_Y, outputpath):
+def write_results(results, name, outputpath):
     os.makedirs(outputpath, exist_ok=True)
-    X_Y.to_csv(outputpath + '/X_Y.tsv', sep="\t")
-    rho_X.to_csv(outputpath + '/simtable_X.tsv', sep="\t")
-    rho_Y.to_csv(outputpath + '/simtable_Y.tsv', sep="\t")
-    rho_X_Y.to_csv(outputpath + '/simtable.tsv', sep="\t")
-    within_X.to_csv(outputpath + '/within_X.tsv', sep="\t")
-    within_Y.to_csv(outputpath + '/within_Y.tsv', sep="\t")
+    if results is not None:
+        results.to_csv(outputpath + '/X_Y.tsv', sep="\t")
+        rho_data = pd.pivot(results, index="Feature_1", columns="Feature_2", values='Correlation') #Reshape from long to wide
+        rho_data.to_csv(outputpath + '/'+name+'.tsv', sep="\t")
 
 
 def remove_missing_values(x, y):

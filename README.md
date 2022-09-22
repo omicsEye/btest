@@ -204,7 +204,8 @@ btest -h
 ```
 Which yields btest command line options.
 ```commandline
-usage: btest [-h] [--version] -X <input_dataset_1.txt> [-Y <input_dataset_2.txt>] -o <output> [-m {nmi,ami,mic,dmic,dcor,pearson,spearman,r2,chi,mi}] [--fdr FDR] [-v VERBOSE] [--diagnostics-plot] [--header] [--format-feature-names] [-s SEED]
+usage: btest [-h] [--version] -X <input_dataset_1.txt> [-Y <input_dataset_2.txt>] -o <output> [-m {pearson,spearman,kendall}] [--fdr FDR] [--var MIN_VAR] [-v VERBOSE] [--diagnostics-plot]
+             [--header] [--format-feature-names] [-s SEED]
 
 block-wise association testing
 
@@ -220,10 +221,11 @@ optional arguments:
   -o <output>, --output <output>
                         directory to write output files
                         [REQUIRED]
-  -m {spearman, pearson, kendall },
+  -m {pearson,spearman,kendall}
                         metric to be used for similarity measurement
                         [default = 'spearman']
   --fdr FDR             Target FDR correction using BH approach
+  --var MIN_VAR         Minimum variation to keep a feature in tests
   -v VERBOSE, --verbose VERBOSE
                         additional output is printed
   --diagnostics-plot    Diagnostics plot for associations 
