@@ -321,7 +321,7 @@ When btest is completed, three main output files will be created:
 btest produces a performance file to store user configuration settings. This configuration file is automatically created in the output directory.
 
 ```sh
-$ vi performance.txt
+$ vi btest.log
 btest version:	1.1.1
 
 ```

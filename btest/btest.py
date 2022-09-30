@@ -25,6 +25,7 @@ except (AttributeError, IndexError):
 
 import argparse
 import csv
+import datetime
 import itertools
 import logging
 import os
@@ -187,7 +188,18 @@ def parse_arguments(args):
 
     return argp.parse_args()
 
-
+def write_config(args):
+    try:
+        btest_log_file = open(str(args.output_dir) + '/btest.log', 'w')
+    except IOError:
+        sys.exit("IO Exception: " + args.output_dir + "/btest.log")
+    csvw = csv.writer(btest_log_file, csv.excel_tab, delimiter='\t')
+    csvw.writerow(["btest version:", config.version])
+    csvw.writerow(["Similarity method: ", config.similarity_method])
+    csvw.writerow(["FDR cut-off : ", args.fdr])
+    csvw.writerow(["Minimum variance for filtering threshold in datasetes : ", args.min_var])
+    csvw.writerow([])
+    btest_log_file.close()
 def btest(X_path, Y_path,
           outputpath,
           method='spearman',
@@ -219,11 +231,20 @@ def btest(X_path, Y_path,
             similarity="Spearman"
         )
     run_time = time.time() - start_time
-    print("Run time: ", run_time)
-
+    try:
+        btest_log_file = open(str(config.output_dir) + '/btest.log', 'a')
+    except IOError:
+        sys.exit("IO Exception: " + config.output_dir + "/btest.log")
+    csvw = csv.writer(btest_log_file, csv.excel_tab, delimiter='\t')
+    csvw.writerow(
+        ["Run time", str(datetime.timedelta(seconds=run_time))])
+    print("--- %s h:m:s similarity caluclation between two datasets features time ---" % str(
+        datetime.timedelta(seconds=run_time)))
+    btest_log_file.close()
     return within_X, within_Y, X_Y
 
 def main():
+
     # Parse arguments from command line
     args = parse_arguments(sys.argv)
 
@@ -232,6 +253,10 @@ def main():
 
     # check the requiremnts based on need for parameters
     check_requirements(args)
+
+    logging.basicConfig(filename=args.output_dir+'/btest.log', level=logging.INFO)
+
+    write_config(args)
 
     # run btest approach
     results = btest(X_path=args.X, Y_path=args.Y, outputpath=args.output_dir, method=args.strMetric, fdr=args.fdr, min_var=args.min_var)

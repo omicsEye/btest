@@ -21,12 +21,6 @@ def readData(X_path, Y_Path, min_var=0.5):
     dataY = pd.read_table(Y_Path, index_col=0, header=0)
     dataX = dataX.astype(float)
     dataY = dataY.astype(float)
-    # find common samples
-    ind = dataY.columns.intersection(dataX.columns)
-    #ind = list(set(set(dataX.columns) & set(dataY.columns)))
-    # filter to common samples
-    dataX = dataX.loc[:, ind]
-    dataY = dataY.loc[:, ind]
 
     dataX = dataX.loc[:,~dataX.columns.duplicated()]
     dataY = dataY.loc[:,~dataY.columns.duplicated()]
@@ -55,6 +49,14 @@ def readData(X_path, Y_Path, min_var=0.5):
     if l2_before > l2_after:
         print("--- %d samples/columns with all missing values have been removed from the second dataset " % (
                 l2_before - l2_after))
+
+    # find common samples
+    ind = dataY.columns.intersection(dataX.columns)
+    #ind = list(set(set(dataX.columns) & set(dataY.columns)))
+    # filter to common samples
+    dataX = dataX.loc[:, ind]
+    dataY = dataY.loc[:, ind]
+
     l1_before = len(dataX.index)
     l2_before = len(dataY.index)
     dataX = dataX[dataX.var(axis=1) > min_var]
@@ -70,6 +72,8 @@ def readData(X_path, Y_Path, min_var=0.5):
         print(
             "--- %d features with variation equal or less than %.3f have been removed from the second dataset " % (
                 l2_before - l2_after, min_var))
+    print('Dataset X dimension  after cleaning: ', dataX.shape)
+    print('Dataset Y dimension  after cleaning: ', dataY.shape)
     valuesX = dataX.values
     valuesY = dataY.values
     #dataAll = pd.concat([dataX, dataY])
@@ -263,20 +267,20 @@ def pearson(x, y):
 
 def spearman(x, y):
     x, y = remove_missing_values(x, y)
-    if (np.unique(x).shape[0] == 1 or np.unique(y).shape[0] == 1):
+    if (np.unique(x).shape[0] <= 2 or np.unique(y).shape[0] <=2 ):
         return(0,1)
     corr, pval = spearmanr(x, y)
     return(corr, pval)
 
 def pearson(x, y):
     x, y = remove_missing_values(x, y)
-    if (np.unique(x).shape[0] == 1 or np.unique(y).shape[0] == 1):
+    if (np.unique(x).shape[0] <= 2 or np.unique(y).shape[0] <= 2):
         return(0,1)
     corr, pval = pearsonr(x, y)
     return(corr, pval)
 def kendall(x,y):
     x, y = remove_missing_values(x, y)
-    if (np.unique(x).shape[0] == 1 or np.unique(y).shape[0] == 1):
+    if (np.unique(x).shape[0] <= 1 or np.unique(y).shape[0] <= 1):
         return (0, 1)
     corr, pval = kendalltau(x, y)
     return (corr, pval)
