@@ -14,6 +14,8 @@ from scipy.stats import pearsonr
 from scipy.stats import spearmanr
 from btest import config
 import itertools
+from itertools import combinations
+from scipy.stats import t
 
 
 def readData(X_path, Y_Path, min_var=0.5):
@@ -193,7 +195,7 @@ def btest_corr(dataAll, features, features_y=None, method='spearman', fdr=0.1, T
                           ascending=[True, False])
     return results
 
-from scipy.stats import t
+
 def btest_corr_2(dataAll, features, features_y=None, method='spearman', fdr=0.1, Type='X_Y'):
     corrleationMethod = corrMethod[method]
     iRow = list(range(0, len(features)))
@@ -243,6 +245,73 @@ def btest_corr_2(dataAll, features, features_y=None, method='spearman', fdr=0.1,
     results['Type'] = Type
     results = results.sort_values(['pval', 'Correlation'],
                                   ascending=[True, False])
+
+
+def melter(dat, val):
+    dat.reset_index(inplace=True)
+    dat.rename({'index': 'Feature_1'}, axis=1, inplace=True)
+    dat = pd.melt(dat, id_vars='Feature_1',
+                        value_vars=dat[1:],
+                        var_name='Feature_2', value_name=val)
+    return dat
+
+
+def btest_corr_3(dataAll, features, features_y=None, method='spearman', fdr=0.1, Type='X_Y'):
+    corrleationMethod = corrMethod[method]
+    iRow = list(range(0, len(features)))
+    if Type == 'X_Y':
+        iCol = list(range(len(features), len(features)+len(features_y)-1))
+        features_y = features + features_y
+    else:
+        features_y = features
+        iCol = list(range(len(features)))
+    tests = []
+
+
+    # creating the complete dataset
+    dataAll2 = pd.DataFrame(dataAll.T, columns=features_y)
+    cr = dataAll2.corr(method=method)
+
+    # calculating t-statistics, based on the correlations
+    t_stat = (cr*(dataAll2.shape[0]-2)**.5)/(1-cr**2)**.5
+
+    # calculating p-values based on the t-statistics
+    pv = 2 * (1 - t.cdf(abs(t_stat), df=dataAll2.shape[0]-2))
+
+    # create long dataframes
+    cr_df = melter(dat=cr, val=method + '_correlation')
+    t_stat_df = melter(dat=t_stat, val='t_statistic')
+    pv_df = melter(dat=pv, val='pval')
+
+    mask = np.isfinite(dataAll)
+    valids = np.zeros((len(features_y), len(features_y)), dtype=np.int32)
+    for i in range(len(features_y)):
+        valid = mask[0] & mask
+        valid = valid.sum(axis=1)
+        valids[i,i:] = valid
+        valids[i:,i] = valid
+        mask = np.delete(mask, 0, 0)
+
+    valids = pd.DataFrame(valids, columns=features_y, index=features_y)
+    valids = melter(dat=valids, val='complete_obs')
+
+
+    df_f = pd.DataFrame(list(combinations(features_y, 2)), columns=['Feature_1', 'Feature_2'])
+    df_f = df_f.merge(valids, how='left')
+    df_f = df_f.merge(cr_df, how='left')
+    df_f = df_f.merge(t_stat_df, how='left')
+    df_f = df_f.merge(pv_df, how='left')
+
+    # results = pd.DataFrame(tests, columns=['Feature_1','Feature_2','pval', 'Correlation', 'Not_NAs'])
+    #
+    # p_adust, p_threshold = bh(results["pval"].values, fdr)
+    #
+    # results["P_adusted"] = p_adust
+    # results["bh_fdr_threshold"] = p_threshold
+    # results['Type'] = Type
+    # results = results.sort_values(['pval', 'Correlation'],
+    #                               ascending=[True, False])
+    return df_f
 
 def write_results(results, name, outputpath):
     os.makedirs(outputpath, exist_ok=True)
