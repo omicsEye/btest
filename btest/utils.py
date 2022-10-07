@@ -259,6 +259,8 @@ def melter(dat, val):
 def btest_corr_3(dataAll, features, features_y=None, method='spearman', fdr=0.1, Type='X_Y'):
     corrleationMethod = corrMethod[method]
     if Type == 'X_Y':
+        features = [f+'_X' for f in features]
+        features_y = [f+'_Y' for f in features_y]
         features_y = features + features_y
     else:
         features_y = features
@@ -268,7 +270,7 @@ def btest_corr_3(dataAll, features, features_y=None, method='spearman', fdr=0.1,
     cr = dataAll2.corr(method=method)
 
     # create long dataframes
-    cr_df = melter(dat=cr, val=method + '_correlation')
+    cr_df = melter(dat=cr, val='Correlation')
 
     mask = np.isfinite(dataAll)
     valid_obs = np.zeros((len(features_y), len(features_y)), dtype=np.int32)
@@ -295,17 +297,24 @@ def btest_corr_3(dataAll, features, features_y=None, method='spearman', fdr=0.1,
     df_f.loc[:,'bh_fdr_threshold'] = None
 
     # calculate t-statistic based on the correlation and degrees of freedom
-    df_f.loc[:, 't_statistic'] = (df_f.loc[:, method + '_correlation']*
+    df_f.loc[:, 't_statistic'] = (df_f.loc[:, 'Correlation']*
                                  (df_f.loc[:, 'complete_obs']-2)**.5) /\
-                                (1-df_f.loc[:, method + '_correlation']**2)**.5
+                                (1-df_f.loc[:, 'Correlation']**2)**.5
     # calculate p-values based on the t-statistic and degrees of freedom
     df_f.loc[:, 'pval'] = 2 * (1 - t.cdf(abs(df_f.loc[:, 't_statistic']),
-                                         df=df_f.loc[:, 'complete_obs']))
+                                         df=df_f.loc[:, 'complete_obs']-2))
 
     # calculate adjusted p-values
     p_adust, p_threshold = bh(df_f.loc[:, 'pval'].values, fdr)
     df_f.loc[:,'P_adusted'] = p_adust
     df_f.loc[:,'bh_fdr_threshold'] = p_threshold
+    if Type == 'X_Y':
+        df_f.loc[:, 'Type'] = df_f.Feature_1.str[-1]+df_f.Feature_2.str[-2:]
+        df_f.loc[:, 'Feature_1'] = df_f.Feature_1.str[:-2]
+        df_f.loc[:, 'Feature_2'] = df_f.Feature_2.str[:-2]
+
+    else:
+        df_f.loc[:, 'Type'] = Type
 
     return df_f
 
