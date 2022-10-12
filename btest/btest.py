@@ -210,13 +210,15 @@ def btest(X_path, Y_path,
     # set the parameter to config file
     start_time = time.time()
     dataX , dataY, featuresX, featuresY  = utils.readData(X_path, Y_path, min_var=min_var)
-    within_X = utils.btest_corr(dataX, featuresX, method=method, fdr=fdr, Type='withinX')
-    within_Y  = utils.btest_corr(dataY, featuresY, method=method, fdr=fdr, Type='withinY')
+    within_X = utils.btest_corr(dataX, featuresX, method=method, fdr=fdr, Type='X_X')
+    within_Y  = utils.btest_corr(dataY, featuresY, method=method, fdr=fdr, Type='Y_Y')
     dataAll = np.concatenate((dataX, dataY), axis=0)
-    X_Y = utils.btest_corr(dataAll, featuresX, featuresY, method=method, fdr=fdr, Type='X_Y')
-
-    utils.write_results(within_X, 'within_X', outputpath)
-    utils.write_results(within_Y, 'within_Y', outputpath)
+    results = utils.btest_corr(dataAll, featuresX, featuresY, method=method, fdr=fdr, Type='X_Y')
+    X_Y = results[results["Type"] == "X_Y"]
+    X_X = results[results["Type"] == "X_X"]
+    Y_Y = results[results["Type"] == "Y_Y"]
+    utils.write_results(within_X, 'X_X', outputpath)
+    utils.write_results(within_Y, 'Y_Y', outputpath)
     utils.write_results(X_Y, 'simtable', outputpath)
     if plot:
         associations = blockplot.load_associations(path=outputpath + '/X_Y.tsv')
