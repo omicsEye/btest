@@ -269,9 +269,6 @@ def btest_corr_3(dataAll, features, features_y=None, method='spearman', fdr=0.1,
     dataAll2 = pd.DataFrame(dataAll.T, columns=features_y)
     cr = dataAll2.corr(method=method)
 
-    # create long dataframes
-    cr_df = melter(dat=cr, val='Correlation')
-
     mask = np.isfinite(dataAll)
     valid_obs = np.zeros((len(features_y), len(features_y)), dtype=np.int32)
     for i in range(len(features_y)):
@@ -282,18 +279,27 @@ def btest_corr_3(dataAll, features, features_y=None, method='spearman', fdr=0.1,
         mask = np.delete(mask, 0, 0)
 
     valid_obs = pd.DataFrame(valid_obs, columns=features_y, index=features_y)
-    valid_obs = melter(dat=valid_obs, val='complete_obs')
+
+    # create long dataframes
+    # cr_df = melter(dat=cr, val='Correlation')
+    # valid_obs = melter(dat=valid_obs, val='complete_obs')
 
     #  prepare report dataframe
-    df_f = pd.DataFrame(list(combinations(features_y, 2)), columns=['Feature_1', 'Feature_2'])
+    check = np.triu(np.ones((dataAll2.shape[1],dataAll2.shape[1])), k=1).astype(bool)
+    df_f = cr.where(check).stack().reset_index()
+    df_f.columns = ['Feature_1', 'Feature_2', 'Correlation']
+
+    valid_obs = valid_obs.where(check).stack().reset_index()
+    df_f.loc[:, 'complete_obs'] = valid_obs.iloc[:, -1]
+
 
     # populate with valid observations and correlation values
-    df_f = df_f.merge(valid_obs, how='left')
-    df_f = df_f.merge(cr_df, how='left')
+    # df_f = df_f.merge(valid_obs, how='left')
+    # df_f = df_f.merge(cr_df, how='left')
     # prepare place holders for other values
     df_f.loc[:,'t_statistic'] = None
     df_f.loc[:,'pval'] = None
-    df_f.loc[:,'P_adusted'] = None
+    df_f.loc[:,'P_adjusted'] = None
     df_f.loc[:,'bh_fdr_threshold'] = None
 
     # calculate t-statistic based on the correlation and degrees of freedom
@@ -306,8 +312,8 @@ def btest_corr_3(dataAll, features, features_y=None, method='spearman', fdr=0.1,
 
     # calculate adjusted p-values
     p_adust, p_threshold = bh(df_f.loc[:, 'pval'].values, fdr)
-    df_f.loc[:,'P_adusted'] = p_adust
-    df_f.loc[:,'bh_fdr_threshold'] = p_threshold
+    df_f.loc[:, 'P_adjusted'] = p_adust
+    df_f.loc[:, 'bh_fdr_threshold'] = p_threshold
     if Type == 'X_Y':
         df_f.loc[:, 'Type'] = df_f.Feature_1.str[-1]+df_f.Feature_2.str[-2:]
         df_f.loc[:, 'Feature_1'] = df_f.Feature_1.str[:-2]
