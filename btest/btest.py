@@ -251,7 +251,7 @@ def main():
     # set the parameter to config file
     set_parameters(args)
 
-    # check the requiremnts based on need for parameters
+    # check the requirements based on need for parameters
     check_requirements(args)
 
     logging.basicConfig(filename=args.output_dir+'/btest.log', level=logging.INFO)

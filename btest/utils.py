@@ -316,6 +316,9 @@ def btest_corr_3(dataAll, features, features_y=None, method='spearman', fdr=0.1,
     else:
         df_f.loc[:, 'Type'] = Type
 
+    df_f = df_f.sort_values(['pval', 'Correlation'],
+                                  ascending=[True, False])
+
     return df_f
 
 def write_results(results, name, outputpath):
