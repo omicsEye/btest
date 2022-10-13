@@ -37,7 +37,7 @@ except ImportError:
         "Topic :: Scientific/Engineering :: Bio-Informatics"
         ]
 
-VERSION = "1.1.1"
+VERSION = "1.1.2"
 AUTHOR = "Bahar Sayoldin"
 AUTHOR_EMAIL = "bahar.sayoldin@gmail.com"
 MAINTAINER = "Ali Rahnavard"
