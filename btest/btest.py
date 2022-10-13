@@ -26,15 +26,9 @@ except (AttributeError, IndexError):
 import argparse
 import csv
 import datetime
-import itertools
 import logging
 import os
-import shutil
 import time
-import math
-import random
-from scipy.stats import pearsonr
-import numpy as np
 import pandas as pd
 
 # Test if numpy is installed
@@ -203,23 +197,26 @@ def write_config(args):
 def btest(X_path, Y_path,
           outputpath,
           method='spearman',
-          plot=True,
           fdr=0.1,
-          min_var=0.0
+          min_var=0.0,
+          plot=True
           ):
     # set the parameter to config file
     start_time = time.time()
-    dataX , dataY, featuresX, featuresY  = utils.readData(X_path, Y_path, min_var=min_var)
-    within_X = utils.btest_corr(dataX, featuresX, method=method, fdr=fdr, Type='X_X')
-    within_Y  = utils.btest_corr(dataY, featuresY, method=method, fdr=fdr, Type='Y_Y')
+    dataX, dataY, featuresX, featuresY = utils.readData(X_path, Y_path, min_var=min_var)
+    X_X = utils.btest_corr_3(dataX, featuresX, method=method, fdr=fdr, Type='X_X')
+    Y_Y = utils.btest_corr_3(dataY, featuresY, method=method, fdr=fdr, Type='Y_Y')
     dataAll = np.concatenate((dataX, dataY), axis=0)
-    results = utils.btest_corr(dataAll, featuresX, featuresY, method=method, fdr=fdr, Type='X_Y')
+    results = utils.btest_corr_3(dataAll, featuresX, featuresY, method=method, fdr=fdr, Type='X_Y')
     X_Y = results[results["Type"] == "X_Y"]
     X_X = results[results["Type"] == "X_X"]
     Y_Y = results[results["Type"] == "Y_Y"]
-    utils.write_results(within_X, 'X_X', outputpath)
-    utils.write_results(within_Y, 'Y_Y', outputpath)
-    utils.write_results(X_Y, 'simtable', outputpath)
+    utils.write_results(X_X, 'X_X', outputpath)
+    utils.write_results(Y_Y, 'Y_Y', outputpath)
+    utils.write_results(X_Y, 'X_Y', outputpath)
+    simtable = pd.pivot(X_Y, index="Feature_1", columns="Feature_2", values='Correlation')  # Reshape from long to wide
+    utils.write_results(simtable, 'simtable', outputpath)
+
     if plot:
         associations = blockplot.load_associations(path=outputpath + '/X_Y.tsv')
         simtable = blockplot.load_order_table(outputpath + '/simtable.tsv', associations)
@@ -243,7 +240,8 @@ def btest(X_path, Y_path,
     print("--- %s h:m:s similarity caluclation between two datasets features time ---" % str(
         datetime.timedelta(seconds=run_time)))
     btest_log_file.close()
-    return within_X, within_Y, X_Y
+    print("btest task completed successfully!!!")
+    return X_X, Y_Y, X_Y
 
 def main():
 

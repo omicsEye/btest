@@ -1,22 +1,12 @@
 import os
-import sys
-import csv
-from scipy.stats import pearsonr, spearmanr, kendalltau
+import time
+
 import numpy as np
 import pandas as pd
-import time
-from numpy import array
-import shutil
-import time
-import math
-import random
+from scipy.stats import kendalltau
 from scipy.stats import pearsonr
 from scipy.stats import spearmanr
-from btest import config
-import itertools
-from itertools import combinations
 from scipy.stats import t
-
 
 
 def readData(X_path, Y_Path, min_var=0.5):
@@ -246,6 +236,7 @@ def btest_corr_2(dataAll, features, features_y=None, method='spearman', fdr=0.1,
     results['Type'] = Type
     results = results.sort_values(['pval', 'Correlation'],
                                   ascending=[True, False])
+    return results
 
 
 def melter(dat, val):
@@ -271,7 +262,7 @@ def btest_corr_3(dataAll, features, features_y=None, method='spearman', fdr=0.1,
 
     t_cr = time.time()
     cr = dataAll2.corr(method=method)
-    print("correlation time: ", time.time()-t_cr)
+    # print("correlation time: ", time.time()-t_cr)
 
     t_mask = time.time()
     mask = np.isfinite(dataAll)
@@ -283,7 +274,7 @@ def btest_corr_3(dataAll, features, features_y=None, method='spearman', fdr=0.1,
         valid_obs[i:,i] = valid
         mask = np.delete(mask, 0, 0)
 
-    print("obs count time: ", time.time()-t_mask)
+    #print("obs count time: ", time.time()-t_mask)
     valid_obs = pd.DataFrame(valid_obs, columns=features_y, index=features_y)
 
     # create long dataframes
@@ -296,7 +287,7 @@ def btest_corr_3(dataAll, features, features_y=None, method='spearman', fdr=0.1,
     valid_obs = valid_obs.where(check).stack().reset_index()
     df_f.loc[:, 'complete_obs'] = valid_obs.iloc[:, -1]
 
-    print("long transform time: ", time.time()-t_long)
+    # print("long transform time: ", time.time()-t_long)
     # prepare place holders for other values
     df_f.loc[:,'t_statistic'] = None
     df_f.loc[:,'pval'] = None
@@ -311,14 +302,14 @@ def btest_corr_3(dataAll, features, features_y=None, method='spearman', fdr=0.1,
     # calculate p-values based on the t-statistic and degrees of freedom
     df_f.loc[:, 'pval'] = 2 * (1 - t.cdf(abs(df_f.loc[:, 't_statistic']),
                                          df=df_f.loc[:, 'complete_obs']-2))
-    print("p-value time: ", time.time()-t_pval)
+    #print("p-value time: ", time.time()-t_pval)
 
     # calculate adjusted p-values
     t_bh = time.time()
     p_adust, p_threshold = bh(df_f.loc[:, 'pval'].values, fdr)
     df_f.loc[:, 'P_adjusted'] = p_adust
     df_f.loc[:, 'bh_fdr_threshold'] = p_threshold
-    print("bh time: ", time.time()-t_bh)
+    #print("bh time: ", time.time()-t_bh)
 
     t_names = time.time()
     if Type == 'X_Y':
@@ -329,12 +320,12 @@ def btest_corr_3(dataAll, features, features_y=None, method='spearman', fdr=0.1,
     else:
         df_f.loc[:, 'Type'] = Type
 
-    print("names time: ", time.time()-t_names)
+    #print("names time: ", time.time()-t_names)
 
     t_sort = time.time()
     df_f = df_f.sort_values(['pval', 'Correlation'],
                             ascending=[True, False])
-    print("sort time: ", time.time()-t_sort)
+    #print("sort time: ", time.time()-t_sort)
 
     df_f = df_f.sort_values(['pval', 'Correlation'],
                                   ascending=[True, False])
@@ -344,9 +335,9 @@ def btest_corr_3(dataAll, features, features_y=None, method='spearman', fdr=0.1,
 def write_results(results, name, outputpath):
     os.makedirs(outputpath, exist_ok=True)
     if results is not None:
-        results.to_csv(outputpath + '/X_Y.tsv', sep="\t")
-        rho_data = pd.pivot(results, index="Feature_1", columns="Feature_2", values='Correlation') #Reshape from long to wide
-        rho_data.to_csv(outputpath + '/'+name+'.tsv', sep="\t")
+        results.to_csv(outputpath + '/' + name + '.tsv', sep="\t")
+        # rho_data = pd.pivot(results, index="Feature_1", columns="Feature_2", values='Correlation') #Reshape from long to wide
+        #rho_data.to_csv(outputpath + '/'+name+'.tsv', sep="\t")
 
 
 def remove_missing_values(x, y):
