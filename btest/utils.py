@@ -18,6 +18,7 @@ from itertools import combinations
 from scipy.stats import t
 
 
+
 def readData(X_path, Y_Path, min_var=0.5):
     dataX = pd.read_table(X_path, index_col=0, header=0)
     dataY = pd.read_table(Y_Path, index_col=0, header=0)
@@ -267,11 +268,12 @@ def btest_corr_3(dataAll, features, features_y=None, method='spearman', fdr=0.1,
 
     # creating the complete dataset
     dataAll2 = pd.DataFrame(dataAll.T, columns=features_y)
+
+    t_cr = time.time()
     cr = dataAll2.corr(method=method)
+    print("correlation time: ", time.time()-t_cr)
 
-    # create long dataframes
-    cr_df = melter(dat=cr, val='Correlation')
-
+    t_mask = time.time()
     mask = np.isfinite(dataAll)
     valid_obs = np.zeros((len(features_y), len(features_y)), dtype=np.int32)
     for i in range(len(features_y)):
@@ -281,33 +283,44 @@ def btest_corr_3(dataAll, features, features_y=None, method='spearman', fdr=0.1,
         valid_obs[i:,i] = valid
         mask = np.delete(mask, 0, 0)
 
+    print("obs count time: ", time.time()-t_mask)
     valid_obs = pd.DataFrame(valid_obs, columns=features_y, index=features_y)
-    valid_obs = melter(dat=valid_obs, val='complete_obs')
 
-    #  prepare report dataframe
-    df_f = pd.DataFrame(list(combinations(features_y, 2)), columns=['Feature_1', 'Feature_2'])
+    # create long dataframes
+    # prepare report dataframe
+    t_long = time.time()
+    check = np.triu(np.ones((dataAll2.shape[1],dataAll2.shape[1])), k=1).astype(bool)
+    df_f = cr.where(check).stack().reset_index()
+    df_f.columns = ['Feature_1', 'Feature_2', 'Correlation']
 
-    # populate with valid observations and correlation values
-    df_f = df_f.merge(valid_obs, how='left')
-    df_f = df_f.merge(cr_df, how='left')
+    valid_obs = valid_obs.where(check).stack().reset_index()
+    df_f.loc[:, 'complete_obs'] = valid_obs.iloc[:, -1]
+
+    print("long transform time: ", time.time()-t_long)
     # prepare place holders for other values
     df_f.loc[:,'t_statistic'] = None
     df_f.loc[:,'pval'] = None
-    df_f.loc[:,'P_adusted'] = None
+    df_f.loc[:,'P_adjusted'] = None
     df_f.loc[:,'bh_fdr_threshold'] = None
 
     # calculate t-statistic based on the correlation and degrees of freedom
+    t_pval = time.time()
     df_f.loc[:, 't_statistic'] = (df_f.loc[:, 'Correlation']*
                                  (df_f.loc[:, 'complete_obs']-2)**.5) /\
                                 (1-df_f.loc[:, 'Correlation']**2)**.5
     # calculate p-values based on the t-statistic and degrees of freedom
     df_f.loc[:, 'pval'] = 2 * (1 - t.cdf(abs(df_f.loc[:, 't_statistic']),
                                          df=df_f.loc[:, 'complete_obs']-2))
+    print("p-value time: ", time.time()-t_pval)
 
     # calculate adjusted p-values
+    t_bh = time.time()
     p_adust, p_threshold = bh(df_f.loc[:, 'pval'].values, fdr)
-    df_f.loc[:,'P_adusted'] = p_adust
-    df_f.loc[:,'bh_fdr_threshold'] = p_threshold
+    df_f.loc[:, 'P_adjusted'] = p_adust
+    df_f.loc[:, 'bh_fdr_threshold'] = p_threshold
+    print("bh time: ", time.time()-t_bh)
+
+    t_names = time.time()
     if Type == 'X_Y':
         df_f.loc[:, 'Type'] = df_f.Feature_1.str[-1]+df_f.Feature_2.str[-2:]
         df_f.loc[:, 'Feature_1'] = df_f.Feature_1.str[:-2]
@@ -315,6 +328,13 @@ def btest_corr_3(dataAll, features, features_y=None, method='spearman', fdr=0.1,
 
     else:
         df_f.loc[:, 'Type'] = Type
+
+    print("names time: ", time.time()-t_names)
+
+    t_sort = time.time()
+    df_f = df_f.sort_values(['pval', 'Correlation'],
+                            ascending=[True, False])
+    print("sort time: ", time.time()-t_sort)
 
     df_f = df_f.sort_values(['pval', 'Correlation'],
                                   ascending=[True, False])
