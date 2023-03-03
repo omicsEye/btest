@@ -23,7 +23,7 @@ enable high-sensitivity discovery of linear and non-linear associations in high-
 4) high quality visualization of data. 
 
 ---
-Please join the community dicussion forum at [omicsEye/btest](https://forum.omicseye.org/)  
+Please join the community discussion forum at [omicsEye/btest](https://forum.omicseye.org/)  
 
 ## Contents ##
 
