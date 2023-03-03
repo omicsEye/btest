@@ -22,6 +22,9 @@ enable high-sensitivity discovery of linear and non-linear associations in high-
 3) provide informative association by incorporating within data sets and among data sets relationships, and
 4) high quality visualization of data. 
 
+---
+Please join the community dicussion forum at [omicsEye/btest](https://forum.omicseye.org/)  
+
 ## Contents ##
 
 * [Features](#features)
