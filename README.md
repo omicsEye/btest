@@ -9,7 +9,7 @@ The tool is for general purpose,  and well-powered association discovery in pair
 
 Bahar Sayoldin, Keith A. Crandall,  Ali Rahnavard, *btest: link, rank, and visualize associations among omics features across multi-omics datasets* [https://rahnavard.org/btest](https://rahnavard.org/btest)
 
-* For installation and a quick demo, read the [Initial Installation]((#initial-installation))
+* For installation and a quick demo, read the [Initial Installation](#initial-installation)
 
 * For installation and a quick demo, read the [btest Workshop](https://github.com/omicsEye/wiki/)
 
