@@ -11,8 +11,6 @@ Bahar Sayoldin, Keith A. Crandall,  Ali Rahnavard, *btest: link, rank, and visua
 
 * For installation and a quick demo, read the [Initial Installation](#initial-installation)
 
-* For installation and a quick demo, read the [btest Workshop](https://github.com/omicsEye/wiki/)
-
 
 _`btest`_ combines block nonparametric hypothesis testing with false discovery rate correction to 
 enable high-sensitivity discovery of linear and non-linear associations in high-dimensional datasets 
