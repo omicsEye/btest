@@ -207,7 +207,7 @@ def btest(X_path, Y_path,
     X_X = utils.btest_corr_3(dataX, featuresX, method=method, fdr=fdr, Type='X_X')
     Y_Y = utils.btest_corr_3(dataY, featuresY, method=method, fdr=fdr, Type='Y_Y')
     dataAll = np.concatenate((dataX, dataY), axis=0)
-    results = utils.btest_corr_3(dataAll, featuresX, featuresY, method=method, fdr=fdr, Type='X_Y')
+    results = utils.btest_corr(dataAll, featuresX, featuresY, method=method, fdr=fdr, Type='X_Y')
     X_Y = results[results["Type"] == "X_Y"]
     X_X = results[results["Type"] == "X_X"]
     Y_Y = results[results["Type"] == "Y_Y"]

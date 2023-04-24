@@ -152,91 +152,91 @@ def bh(p, q):
     return p_adust, p_threshold
 
 
-def btest_corr(dataAll, features, features_y=None, method='spearman', fdr=0.1, Type='X_Y'):
-    corrleationMethod = corrMethod[method]
-    iRow = list(range(0, len(features)))
-    if Type=='X_Y':
-        iCol = list(range(len(features), len(features)+len(features_y)-1))
-        features_y = features + features_y
-    else:
-        features_y = features
-        iCol = list(range(len(features)))
-    tests = []
-    for i in iRow:
-        for j in iCol:
-            if i<=j:
-                #print(i, j)
-                X = dataAll[i]
-                Y = dataAll[j]
-                nas = np.isnan(X + Y)
-                not_na = sum(~nas)
-                #X = Y[~nas]
-                #Y = Y[~nas]
-                #new_X, new_Y = remove_pairs_with_a_missing(X, Y)
-                correlation, pval = corrleationMethod(X, Y)
-                tests.append([features[i], features_y[j], pval, correlation, not_na])
-    results = pd.DataFrame(tests, columns=['Feature_1','Feature_2','pval', 'Correlation', 'Not_NAs'])
-
-    p_adust, p_threshold = bh(results["pval"].values, fdr)
-
-    results["P_adusted"] = p_adust
-    results["bh_fdr_threshold"] = p_threshold
-    results['Type'] = Type
-    results = results.sort_values(['pval', 'Correlation'],
-                          ascending=[True, False])
-    return results
-
-
-def btest_corr_2(dataAll, features, features_y=None, method='spearman', fdr=0.1, Type='X_Y'):
-    # corrleationMethod = corrMethod[method]
-    iRow = list(range(0, len(features)))
-    if Type == 'X_Y':
-        iCol = list(range(len(features), len(features)+len(features_y)-1))
-        features_y = features + features_y
-    else:
-        features_y = features
-        iCol = list(range(len(features)))
-    tests = []
-
-    # creating the complete dataset
-    dataAll2 = pd.DataFrame(dataAll.T, columns=features_y)
-    cr = dataAll2.corr(method=method)
-
-    # calculating t-statistics, based on the correlations
-    t_stat = (cr*(dataAll2.shape[0]-2)**.5)/(1-cr**2)**.5
-
-    # calculating p-values based on the t-statistics
-    pv = 2 * (1 - t.cdf(abs(t_stat), df=dataAll2.shape[0]-2))
-    #rho_long_format = cr.stack().reset_index().rename(columns={'level_0':'Feature_1','level_1':'Feature_2', 0:'Correlation'})
-    #pval_long_format = pv.stack().reset_index().rename(columns={'level_0':'Feature_1','level_1':'Feature_2', 0:'pval'})
-    #results = pd.concat([pval_long_format, rho_long_format["Correlation"]], axis=1)
-    cr = cr.to_numpy()
-    #pv = pv.to_numpy()
-    for i in iRow:
-        for j in iCol:
-            if i<=j:
-                #print(i, j)
-                #print(dataAll[i])
-                X = dataAll[i]
-                Y = dataAll[j]
-                nas = np.isnan(X + Y)
-                not_na = sum(~nas)
-                #X = Y[~nas]
-                #Y = Y[~nas]
-                #new_X, new_Y = remove_pairs_with_a_missing(X, Y)
-                correlation = cr[i, j]
-                pval =  pv[i, j]
-                tests.append([features[i], features_y[j], pval, correlation, not_na])
-    results = pd.DataFrame(tests, columns=['Feature_1','Feature_2','pval', 'Correlation', 'Not_NAs'])
-
-    p_adust, p_threshold = bh(results["pval"].values, fdr)
-
-    results["P_adusted"] = p_adust
-    results["bh_fdr_threshold"] = p_threshold
-    results['Type'] = Type
-    results = results.sort_values(['pval', 'Correlation'],
-                                  ascending=[True, False])
-    return results
+# def btest_corr(dataAll, features, features_y=None, method='spearman', fdr=0.1, Type='X_Y'):
+#     corrleationMethod = corrMethod[method]
+#     iRow = list(range(0, len(features)))
+#     if Type=='X_Y':
+#         iCol = list(range(len(features), len(features)+len(features_y)-1))
+#         features_y = features + features_y
+#     else:
+#         features_y = features
+#         iCol = list(range(len(features)))
+#     tests = []
+#     for i in iRow:
+#         for j in iCol:
+#             if i<=j:
+#                 #print(i, j)
+#                 X = dataAll[i]
+#                 Y = dataAll[j]
+#                 nas = np.isnan(X + Y)
+#                 not_na = sum(~nas)
+#                 #X = Y[~nas]
+#                 #Y = Y[~nas]
+#                 #new_X, new_Y = remove_pairs_with_a_missing(X, Y)
+#                 correlation, pval = corrleationMethod(X, Y)
+#                 tests.append([features[i], features_y[j], pval, correlation, not_na])
+#     results = pd.DataFrame(tests, columns=['Feature_1','Feature_2','pval', 'Correlation', 'Not_NAs'])
+#
+#     p_adust, p_threshold = bh(results["pval"].values, fdr)
+#
+#     results["P_adusted"] = p_adust
+#     results["bh_fdr_threshold"] = p_threshold
+#     results['Type'] = Type
+#     results = results.sort_values(['pval', 'Correlation'],
+#                           ascending=[True, False])
+#     return results
+#
+#
+# def btest_corr_2(dataAll, features, features_y=None, method='spearman', fdr=0.1, Type='X_Y'):
+#     # corrleationMethod = corrMethod[method]
+#     iRow = list(range(0, len(features)))
+#     if Type == 'X_Y':
+#         iCol = list(range(len(features), len(features)+len(features_y)-1))
+#         features_y = features + features_y
+#     else:
+#         features_y = features
+#         iCol = list(range(len(features)))
+#     tests = []
+#
+#     # creating the complete dataset
+#     dataAll2 = pd.DataFrame(dataAll.T, columns=features_y)
+#     cr = dataAll2.corr(method=method)
+#
+#     # calculating t-statistics, based on the correlations
+#     t_stat = (cr*(dataAll2.shape[0]-2)**.5)/(1-cr**2)**.5
+#
+#     # calculating p-values based on the t-statistics
+#     pv = 2 * (1 - t.cdf(abs(t_stat), df=dataAll2.shape[0]-2))
+#     #rho_long_format = cr.stack().reset_index().rename(columns={'level_0':'Feature_1','level_1':'Feature_2', 0:'Correlation'})
+#     #pval_long_format = pv.stack().reset_index().rename(columns={'level_0':'Feature_1','level_1':'Feature_2', 0:'pval'})
+#     #results = pd.concat([pval_long_format, rho_long_format["Correlation"]], axis=1)
+#     cr = cr.to_numpy()
+#     #pv = pv.to_numpy()
+#     for i in iRow:
+#         for j in iCol:
+#             if i<=j:
+#                 #print(i, j)
+#                 #print(dataAll[i])
+#                 X = dataAll[i]
+#                 Y = dataAll[j]
+#                 nas = np.isnan(X + Y)
+#                 not_na = sum(~nas)
+#                 #X = Y[~nas]
+#                 #Y = Y[~nas]
+#                 #new_X, new_Y = remove_pairs_with_a_missing(X, Y)
+#                 correlation = cr[i, j]
+#                 pval =  pv[i, j]
+#                 tests.append([features[i], features_y[j], pval, correlation, not_na])
+#     results = pd.DataFrame(tests, columns=['Feature_1','Feature_2','pval', 'Correlation', 'Not_NAs'])
+#
+#     p_adust, p_threshold = bh(results["pval"].values, fdr)
+#
+#     results["P_adusted"] = p_adust
+#     results["bh_fdr_threshold"] = p_threshold
+#     results['Type'] = Type
+#     results = results.sort_values(['pval', 'Correlation'],
+#                                   ascending=[True, False])
+#     return results
 
 
 def melter(dat, val):
@@ -248,7 +248,7 @@ def melter(dat, val):
     return dat
 
 
-def btest_corr_3(dataAll, features, features_y=None, method='spearman', fdr=0.1, Type='X_Y'):
+def btest_corr(dataAll, features, features_y=None, method='spearman', fdr=0.1, Type='X_Y'):
     corrleationMethod = corrMethod[method]
     if Type == 'X_Y':
         features = [f+'_X' for f in features]

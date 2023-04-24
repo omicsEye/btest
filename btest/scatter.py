@@ -57,7 +57,7 @@ def get_args():
 
 def load_table(args):
     try:
-        associations = btestgram.load_associations( str(args.input)+'/associations.txt', largest=None, strongest=None, orderby = 'similarity' )
+        associations = blockplot.load_associations( str(args.input)+'/associations.txt', largest=None, strongest=None, orderby = 'similarity' )
         df1 = pd.read_csv(str(args.input)+'/X_dataset.txt', sep='\t', header=0, index_col =0)
         df2 = pd.read_csv(str(args.input)+'/Y_dataset.txt', sep='\t', header=0, index_col =0)
     except ImportError:

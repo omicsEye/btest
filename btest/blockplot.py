@@ -10,6 +10,7 @@ import os
 import sys
 import argparse
 import csv
+import pandas as pd
 import getpass
 
 try:
@@ -166,7 +167,7 @@ def get_order(path):
                 break
     return [row_order, col_order]
 
-def load_order_table(p_table, associations, p_tree = None):
+def load_order_table(p_table, associations, strongest = 100, p_tree = None):
     allowed_rowheads = {k for items in associations for k in items[1]}
     allowed_colheads = {k for items in associations for k in items[2]}
     simtable = Table(p_table)
@@ -183,6 +184,11 @@ def load_order_table(p_table, associations, p_tree = None):
     simtable.data = simtable.data[:, col_order]
     simtable.update()
     return simtable
+
+def cluster_order_table(pairs):
+    pairs = pd.DataFrame(pairs)
+    simtable = pd.pivot(pairs, index="Feature_1", columns="Feature_2", values='Correlation')  # Reshape from long to wide
+
 
 def load_associations(path, largest=None, strongest=100, orderby='similarity'):
     pairs = []
