@@ -168,7 +168,7 @@ def btest_corr(dataAll, features, features_y=None, method='spearman', fdr=0.1, T
                 #print(i, j)
                 X = dataAll[i]
                 Y = dataAll[j]
-                nas = np.logical_or(X != X, Y != Y)
+                nas = np.isnan(X + Y)
                 not_na = sum(~nas)
                 #X = Y[~nas]
                 #Y = Y[~nas]
@@ -188,7 +188,7 @@ def btest_corr(dataAll, features, features_y=None, method='spearman', fdr=0.1, T
 
 
 def btest_corr_2(dataAll, features, features_y=None, method='spearman', fdr=0.1, Type='X_Y'):
-    corrleationMethod = corrMethod[method]
+    # corrleationMethod = corrMethod[method]
     iRow = list(range(0, len(features)))
     if Type == 'X_Y':
         iCol = list(range(len(features), len(features)+len(features_y)-1))
@@ -219,7 +219,7 @@ def btest_corr_2(dataAll, features, features_y=None, method='spearman', fdr=0.1,
                 #print(dataAll[i])
                 X = dataAll[i]
                 Y = dataAll[j]
-                nas = np.logical_or(X != X, Y != Y)
+                nas = np.isnan(X + Y)
                 not_na = sum(~nas)
                 #X = Y[~nas]
                 #Y = Y[~nas]
