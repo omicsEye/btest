@@ -25,6 +25,7 @@ from matplotlib.pyplot import xlabel
 from itertools import product
 from matplotlib import font_manager
 from . import config
+from . import utils
 
 import warnings
 
@@ -719,3 +720,54 @@ def scatter_plot(X, Y, filename='scatter'):
     fig.tight_layout()
     fig.savefig(filename + '.pdf')
 
+
+def b_scatter(dataX, dataY, b_test, n_ind, min_var=0, report_dir='.'):
+    assert type(dataX) == type(dataY), 'Type of dataX and dataY should be the same.'
+    if isinstance(dataX, str):
+        dataX, dataY, _, _ = utils.readData(dataX, dataY, min_var=min_var)
+    if isinstance(b_test, str):
+        b_test = pd.read_csv(b_test)
+
+    for n in n_ind:
+        row = b_test.iloc[n, :]
+        var1 = row.loc['Feature_1']
+        var2 = row.loc['Feature_2']
+
+        comp_type = row.loc['Type']
+        var1_ind = int(var1[1:])
+        var2_ind = int(var2[1:])
+
+        text_dict = {}
+        text_ann = ''
+        for key in ['Correlation', 'complete_obs', 'P_adjusted']:
+            text_dict[key] = row.loc[key]
+            text_ann = text_ann + key + ': ' + str(round(row.loc[key], 3)) + '\n'
+
+        if comp_type == 'X_X':
+            var1_val = dataX[var1_ind]
+            var2_val = dataX[var2_ind]
+        elif comp_type == 'X_Y':
+            var1_val = dataX[var1_ind]
+            var2_val = dataY[var2_ind]
+        else:
+            var1_val = dataY[var1_ind]
+            var2_val = dataY[var2_ind]
+
+        fig, ax = plt.subplots(1, 1, figsize=(3.2, 3.2), dpi=300)
+        plt.scatter(x=var1_val, y=var2_val,
+                    edgecolors='#000',
+                    linewidths=.5,
+                    c='#123435', alpha=.5,
+                    marker="o")
+        plt.xlabel(var1)
+        plt.ylabel(var2)
+        if text_dict['Correlation'] > 0:
+            plt.text(0.02, .7, text_ann, fontstyle='italic',
+                     transform=ax.transAxes, fontsize=8)
+        else:
+            plt.text(0.8, .7, text_ann, transform=ax.transAxes)
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+        plt.savefig(str(report_dir + '/' + var1 + '_' + var2 + '.pdf'), bbox_inches='tight')
+        # plt.show()
+    return 'Done'

@@ -84,7 +84,8 @@ setup(
             'btest = btest.btest:main',
             'blockplot = btest.blockplot:main',
             'bdata = btest.datasim:main',
-            'bscatter = btest.scatter:main'
+            'bscatter = btest.scatter:main',
+            'b_scatter = btest.b_scatter:main'
         ]},
     test_suite= 'btest.tests.btest_test.main',
     zip_safe = False
