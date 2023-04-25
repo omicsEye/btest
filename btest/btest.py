@@ -204,8 +204,8 @@ def btest(X_path, Y_path,
     # set the parameter to config file
     start_time = time.time()
     dataX, dataY, featuresX, featuresY = utils.readData(X_path, Y_path, min_var=min_var)
-    X_X = utils.btest_corr_3(dataX, featuresX, method=method, fdr=fdr, Type='X_X')
-    Y_Y = utils.btest_corr_3(dataY, featuresY, method=method, fdr=fdr, Type='Y_Y')
+    # X_X = utils.btest_corr(dataX, featuresX, method=method, fdr=fdr, Type='X_X')
+    # Y_Y = utils.btest_corr(dataY, featuresY, method=method, fdr=fdr, Type='Y_Y')
     dataAll = np.concatenate((dataX, dataY), axis=0)
     results = utils.btest_corr(dataAll, featuresX, featuresY, method=method, fdr=fdr, Type='X_Y')
     X_Y = results[results["Type"] == "X_Y"]
@@ -259,7 +259,8 @@ def main():
     write_config(args)
 
     # run btest approach
-    results = btest(X_path=args.X, Y_path=args.Y, outputpath=args.output_dir, method=args.strMetric, fdr=args.fdr, min_var=args.min_var)
+    results = btest(X_path=args.X, Y_path=args.Y, outputpath=args.output_dir,
+                    method=args.strMetric, fdr=args.fdr, min_var=args.min_var)
 
 
 if __name__ == '__main__':
