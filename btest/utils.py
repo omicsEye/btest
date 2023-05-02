@@ -251,8 +251,8 @@ def melter(dat, val):
 def btest_corr(dataAll, features, features_y=None, method='spearman', fdr=0.1, Type='X_Y'):
     corrleationMethod = corrMethod[method]
     if Type == 'X_Y':
-        features = [f+'_X' for f in features]
-        features_y = [f+'_Y' for f in features_y]
+        features = [str(f)+'_X' for f in features]
+        features_y = [str(f)+'_Y' for f in features_y]
         features_y = features + features_y
     else:
         features_y = features
