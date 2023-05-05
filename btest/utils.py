@@ -374,7 +374,3 @@ def kendall(x,y):
     return (corr, pval)
 
 corrMethod = {"spearman" : spearman, "pearson": pearson, "kendall":kendall}
-
-
-
-
