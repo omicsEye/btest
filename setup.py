@@ -76,7 +76,7 @@ setup(
         "Scipy >= 0.17.0",
         "Matplotlib >= 1.5.1",
         "Scikit-learn >= 0.14.1",
-        "pandas >= 1.0.4"
+        "pandas == 1.5.3"
     ],
     packages=find_packages(),
     entry_points={

@@ -63,7 +63,7 @@ def get_btest_base_directory():
     return btest_base_directory
 
 
-def check_requirements(args):
+def check_requirements(output_dir):
     """
     Check requirements (file format, dependencies, permissions)
     """
@@ -73,7 +73,7 @@ def check_requirements(args):
     except ImportError:
         sys.exit("--- Please check your installation for pandas library")
     # Check that the output directory is writeable
-    output_dir = os.path.abspath(args.output_dir)
+    output_dir = os.path.abspath(output_dir)
     if not os.path.isdir(output_dir):
         try:
             print("Creating output directory: " + output_dir)
@@ -205,7 +205,9 @@ def btest(X_path, Y_path,
           min_var=0.0,
           plot=True
           ):
-    # set the parameter to config file
+    # create output directory
+    check_requirements(outputpath)
+    logging.basicConfig(filename=outputpath + '/btest.log', level=logging.INFO)
     start_time = time.time()
     dataX, dataY, featuresX, featuresY = utils.readData(X_path, Y_path, min_var=min_var)
     # X_X = utils.btest_corr(dataX, featuresX, method=method, fdr=fdr, Type='X_X')
@@ -255,16 +257,11 @@ def main():
     # set the parameter to config file
     set_parameters(args)
 
-    # check the requirements based on need for parameters
-    check_requirements(args)
-
-    logging.basicConfig(filename=args.output_dir + '/btest.log', level=logging.INFO)
-
-    write_config(args)
 
     # run btest approach
     results = btest(X_path=args.X, Y_path=args.Y, outputpath=args.output_dir,
                     method=args.strMetric, fdr=args.fdr, min_var=args.min_var)
+    write_config(args)
 
 
 if __name__ == '__main__':
