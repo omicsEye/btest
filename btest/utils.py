@@ -269,14 +269,8 @@ def btest_corr(dataAll, features, features_y=None, method='spearman', fdr=0.1, T
     # print("correlation time: ", time.time()-t_cr)
 
     t_mask = time.time()
-    mask = np.isfinite(dataAll)
-    valid_obs = np.zeros((len(features_y), len(features_y)), dtype=np.int32)
-    for i in range(len(features_y)):
-        valid = mask[0] & mask
-        valid = valid.sum(axis=1)
-        valid_obs[i, i:] = valid
-        valid_obs[i:, i] = valid
-        mask = np.delete(mask, 0, 0)
+    mask = np.isfinite(dataAll.T)
+    valid_obs = np.dot(mask.T.astype(int), mask.astype(int))
 
     # print("obs count time: ", time.time()-t_mask)
     valid_obs = pd.DataFrame(valid_obs, columns=features_y, index=features_y)
@@ -289,7 +283,10 @@ def btest_corr(dataAll, features, features_y=None, method='spearman', fdr=0.1, T
     df_f.columns = ['Feature_1', 'Feature_2', 'Correlation']
 
     valid_obs = valid_obs.where(check).stack().reset_index()
-    df_f.loc[:, 'complete_obs'] = valid_obs.iloc[:, -1]
+    valid_obs.columns = ['Feature_1', 'Feature_2', 'complete_obs']
+
+    #     df_f.loc[:, 'complete_obs'] = valid_obs.loc[:, 'complete_obs']
+    df_f = df_f.merge(valid_obs, on=['Feature_1', 'Feature_2'])
 
     # print("long transform time: ", time.time()-t_long)
     # prepare place holders for other values
@@ -327,10 +324,6 @@ def btest_corr(dataAll, features, features_y=None, method='spearman', fdr=0.1, T
     # print("names time: ", time.time()-t_names)
 
     t_sort = time.time()
-    df_f = df_f.sort_values(['pval', 'Correlation'],
-                            ascending=[True, False])
-    # print("sort time: ", time.time()-t_sort)
-
     df_f = df_f.sort_values(['pval', 'Correlation'],
                             ascending=[True, False])
 
