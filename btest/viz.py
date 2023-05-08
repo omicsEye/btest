@@ -5,29 +5,23 @@ including all graphics and 'data object to plot' transformations.
 
 # from pylab import plot, hist, scatter
 
-import sys
-import scipy
-import pylab
-from array import array
 import math
-from numpy import array, median
-import numpy
+import warnings
+
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import pylab
+import scipy
 import scipy.cluster
 import scipy.cluster.hierarchy as sch
-from scipy.cluster.hierarchy import linkage, to_tree, leaves_list
-from scipy.spatial.distance import pdist, squareform
-import pandas as pd
-import numpy as np
-from numpy.matlib import rand
-import matplotlib.pyplot as plt
-import matplotlib
-from matplotlib.pyplot import xlabel
-from itertools import product
 from matplotlib import font_manager
+from scipy.cluster.hierarchy import linkage
+from scipy.spatial.distance import pdist
+
 from . import config
 from . import utils
-
-import warnings
 
 with warnings.catch_warnings():
     warnings.simplefilter("error")
@@ -159,13 +153,8 @@ def plot_roc(roc_info=None, title=None, figure_name='roc_plot_btest', ax=None):
 
     print(__doc__)
 
-    import numpy as np
     import matplotlib.pyplot as plt
-    from sklearn import svm, datasets
-    from sklearn.metrics import roc_curve, auc
-    from sklearn.cross_validation import train_test_split
-    from sklearn.preprocessing import label_binarize
-    from sklearn.multiclass import OneVsRestClassifier
+    from sklearn.metrics import auc
     '''roc_info = [  
         ['btest',[.005, .1,.15,.2, .21, .22, .3, .35, .4,.41, .42,97], [.005,.35,.6,.65, .8, .85, .88, .89, .90,.93, .97, .999] ],
         ['AllA', [.005, .1,.15,.2, .21, .22, .3, .35, .4,.41, .42,97], [.005,.33,.5,.6, .7, .75, .8, .85, .88,.9, .93, .95] ]
@@ -721,12 +710,12 @@ def scatter_plot(X, Y, filename='scatter'):
     fig.savefig(filename + '.pdf')
 
 
-def b_scatter(dataX, dataY, b_test, n_ind, min_var=0, report_dir='.'):
+def b_scatter(dataX, dataY, b_test, n_ind, min_var=0, output_dir='.'):
     assert type(dataX) == type(dataY), 'Type of dataX and dataY should be the same.'
     if isinstance(dataX, str):
-        dataX, dataY, _, _ = utils.readData(dataX, dataY, min_var=min_var)
+        dataX, dataY, featureX, featureY = utils.readData(dataX, dataY, min_var=min_var)
     if isinstance(b_test, str):
-        b_test = pd.read_csv(b_test)
+        b_test = pd.read_csv(b_test, delimiter='\t')
 
     for n in n_ind:
         row = b_test.iloc[n, :]
@@ -734,8 +723,8 @@ def b_scatter(dataX, dataY, b_test, n_ind, min_var=0, report_dir='.'):
         var2 = row.loc['Feature_2']
 
         comp_type = row.loc['Type']
-        var1_ind = int(var1[1:])
-        var2_ind = int(var2[1:])
+        var1_ind = featureX.index(var1)
+        var2_ind = featureY.index(var2)
 
         text_dict = {}
         text_ann = ''
@@ -753,21 +742,26 @@ def b_scatter(dataX, dataY, b_test, n_ind, min_var=0, report_dir='.'):
             var1_val = dataY[var1_ind]
             var2_val = dataY[var2_ind]
 
-        fig, ax = plt.subplots(1, 1, figsize=(3.2, 3.2), dpi=300)
+        fig, ax = plt.subplots(1, 1, figsize=(2.4, 2.4), dpi=300)
         plt.scatter(x=var1_val, y=var2_val,
                     edgecolors='#000',
-                    linewidths=.5,
-                    c='#123435', alpha=.5,
+                    linewidths=.25,
+                    c='#123435',
+                    alpha=.5,
+                    s=10,
                     marker="o")
-        plt.xlabel(var1)
-        plt.ylabel(var2)
+        ax.xaxis.set_tick_params(labelsize=6)
+        ax.yaxis.set_tick_params(labelsize=6)
+        plt.xlabel(var1, fontsize=8, fontweight='bold')
+        plt.ylabel(var2, fontsize=8, fontweight='bold')
         if text_dict['Correlation'] > 0:
             plt.text(0.02, .7, text_ann, fontstyle='italic',
-                     transform=ax.transAxes, fontsize=8)
+                     transform=ax.transAxes, fontsize=7)
         else:
-            plt.text(0.8, .7, text_ann, transform=ax.transAxes)
+            plt.text(0.5, 0.7, text_ann, fontstyle='italic',
+                     transform=ax.transAxes, fontsize=7)
         ax.spines['right'].set_visible(False)
         ax.spines['top'].set_visible(False)
-        plt.savefig(str(report_dir + '/' + var1 + '_' + var2 + '.pdf'), bbox_inches='tight')
+        plt.savefig(str(output_dir + '/' + var1 + '_' + var2 + '.pdf'), bbox_inches='tight')
         # plt.show()
     return 'Done'

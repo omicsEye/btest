@@ -1,8 +1,9 @@
-import os
 import argparse
-import warnings
-from .viz import b_scatter
 import datetime
+import os
+import warnings
+
+from .viz import b_scatter
 
 
 def parse_arguments():
@@ -25,15 +26,15 @@ def main():
 
     args = parse_arguments()
     dt_label = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    report_dir = str(args.out + '_' + dt_label)
-    os.makedirs(report_dir)
+    output_dir = str(args.out + '_' + dt_label)
+    os.makedirs(output_dir)
 
     n_ind = args.ind.split(',')
     n_ind = list(map(int, n_ind))
     b_scatter(args.datax, args.datay, b_test=args.b_test,
               n_ind=n_ind,
               min_var=args.min,
-              report_dir=report_dir)
+              output_dir=output_dir)
     return print('Done!')
 
 
