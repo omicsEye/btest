@@ -1,13 +1,13 @@
 version = '1.1.2'
 __description__ = """
-btest for block-wise association testing 
+btest for link and prioritize feature between two omics datasets
 configuration file
 """
 
 __doc__ = __doc__
 __version__ = version
-__author__ = ["Ali Rahnavard"]
-__contact__ = "gholamali.rahnavard@gmail.com"
+__author__ = ["Bahar Sayoldin"]
+__contact__ = "bahar.sayoldin@gmail.com"
 
 keys_attribute = ["__description__", "__version__", "__author__", "__contact__", "q", "distance", "iterations",
                   "decomposition", "p_adjust_method", "randomization_method"]

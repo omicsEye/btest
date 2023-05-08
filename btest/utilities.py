@@ -1,5 +1,5 @@
 ######parsin files#######
-#!/usr/bin/env python
+# !/usr/bin/env python
 '''
 Parses input/output formats,
 manages transformations
@@ -134,16 +134,16 @@ class Input:
         store.smart_decisoin()
         if store.bypass_discretizing():
             # try:
-            #print(self.orginal_dataset1)
-            #print(self.orginal_dataset2)
+            # print(self.orginal_dataset1)
+            # print(self.orginal_dataset2)
             self.orginal_dataset1 = np.asarray(self.orginal_dataset1, dtype=float)
 
             self.orginal_dataset2 = np.asarray(self.orginal_dataset2, dtype=float)
             self._transform_data()
             # self.discretized_dataset1 = self.orginal_dataset1
             # self.discretized_dataset2 = self.orginal_dataset2
-           # except:
-                #sys.exit("--- Please check your data types and your similarity metric!")
+        # except:
+        # sys.exit("--- Please check your data types and your similarity metric!")
         self._check_for_semi_colon()
 
     def get(self):
@@ -300,26 +300,26 @@ class Input:
 
             if l1_before > l1_after:
                 print("--- %d samples/columns with all missing values have been removed from the first dataset " % (
-                            l1_before - l1_after))
+                        l1_before - l1_after))
 
             if l2_before > l2_after:
                 print("--- %d samples/columns with all missing values have been removed from the second dataset " % (
-                            l2_before - l2_after))
+                        l2_before - l2_after))
 
             # Keep common samples/columns between two data frame
             paired_sample = list(set(set(df1.columns) & set(df2.columns)))
-            #print(len(paired_sample), paired_sample)
-            #print(df1.shape, df2.shape)
+            # print(len(paired_sample), paired_sample)
+            # print(df1.shape, df2.shape)
             df1 = df1.loc[:, paired_sample]
             df2 = df2.loc[:, paired_sample]
-            df1 = df1.loc[:,~df1.columns.duplicated()]
-            df2 = df2.loc[:,~df2.columns.duplicated()]
+            df1 = df1.loc[:, ~df1.columns.duplicated()]
+            df2 = df2.loc[:, ~df2.columns.duplicated()]
 
             # reorder df1 columns as the columns order of df2
 
-            #df1[paired_sample]
-            #df2[paired_sample]
-            #print(df1.shape, df1, df2.shape, df2)
+            # df1[paired_sample]
+            # df2[paired_sample]
+            # print(df1.shape, df1, df2.shape, df2)
             self.orginal_dataset1 = df1.values
             self.orginal_dataset2 = df2.values
 
@@ -340,7 +340,7 @@ class Input:
             print(
                 ("The program uses %s common samples between the two data sets based on headers") % (str(df1.shape[1])))
         if len(self.orginal_dataset1[0]) != len(self.orginal_dataset2[0]):
-            print (len(df1.columns), len(df2.columns))
+            print(len(df1.columns), len(df2.columns))
             sys.exit("Have you provided --header option to use sample/column names for shared sample/columns?")
 
     def _remove_low_variant_features(self):
@@ -364,12 +364,12 @@ class Input:
         l2_after = len(df2.index)
         if l1_before > l1_after:
             print("--- %d features with variation equal or less than %.3f have been removed from the first dataset " % (
-            l1_before - l1_after, config.min_var))
+                l1_before - l1_after, config.min_var))
 
         if l2_before > l2_after:
             print(
                 "--- %d features with variation equal or less than %.3f have been removed from the second dataset " % (
-                l2_before - l2_after, config.min_var))
+                    l2_before - l2_after, config.min_var))
         # reorder df1 columns as the columns order of df2
         # df1 = df1.loc[:, df2.columns]
 
@@ -416,11 +416,11 @@ class Input:
         l2_after = len(df2.index)
         if l1_before > l1_after:
             print("--- %d features with entropy equal or less than %.3f have been removed from the first dataset " % (
-            (l1_before - l1_after), config.entropy_threshold1))
+                (l1_before - l1_after), config.entropy_threshold1))
 
         if l2_before > l2_after:
             print("--- %d features with entropy equal or less than %.3f have been removed from the second dataset " % (
-            (l2_before - l2_after), config.entropy_threshold2))
+                (l2_before - l2_after), config.entropy_threshold2))
         # reorder df1 columns as the columns order of df2
         # df1 = df1.loc[:, df2.columns]
 
@@ -442,12 +442,12 @@ class Input:
         # print df2
         try:
             print("--- %d features and %d samples are used from first dataset" % (
-            l1_after, len(self.discretized_dataset1[0])))
+                l1_after, len(self.discretized_dataset1[0])))
         except IndexError:
             sys.exit("WARNING! No feature in the first dataset after filtering.")
         try:
             print("--- %d features and %d samples are used from second dataset" % (
-            l2_after, len(self.discretized_dataset2[0])))
+                l2_after, len(self.discretized_dataset2[0])))
         except IndexError:
             sys.exit("WARNING! No feature in the second dataset after filtering.")
 
@@ -460,8 +460,9 @@ class Input:
         self.orginal_dataset2 = stats.scale_data(self.orginal_dataset2, scale=scale)
     # print(self.orginal_dataset1)
 
+
 ######logging files
-#!/usr/bin/env python
+# !/usr/bin/env python
 
 import logging
 import pylab
@@ -631,6 +632,8 @@ def write_circos_table(data, name=None, rowheader=None, colheader=None, prefix="
                 f.write(delimiter)
         f.write('\n')
     f.close()
+
+
 ###############################HSIC
 import math
 import random

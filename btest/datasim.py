@@ -285,17 +285,17 @@ def call_data_generator(args):
     if args.structure == "imbalanced":
         if association_type == "structured_random":
             X, _, _ = btest.datasim.imbalanced_synthetic_dataset_uniform(D=number_features, N=number_samples, \
-                                                                                B=number_blocks,
-                                                                                within_noise=args.noise_within,
-                                                                                between_noise=args.noise_between,
-                                                                                cluster_percentage=cluster_percentage_l,
-                                                                                association_type='parabola')
+                                                                         B=number_blocks,
+                                                                         within_noise=args.noise_within,
+                                                                         between_noise=args.noise_between,
+                                                                         cluster_percentage=cluster_percentage_l,
+                                                                         association_type='parabola')
             _, Y, _ = btest.datasim.imbalanced_synthetic_dataset_uniform(D=number_features, N=number_samples \
-                                                                                , B=number_blocks,
-                                                                                within_noise=args.noise_within,
-                                                                                between_noise=args.noise_between, \
-                                                                                cluster_percentage=cluster_percentage_l,
-                                                                                association_type='parabola')
+                                                                         , B=number_blocks,
+                                                                         within_noise=args.noise_within,
+                                                                         between_noise=args.noise_between, \
+                                                                         cluster_percentage=cluster_percentage_l,
+                                                                         association_type='parabola')
             A = np.zeros((len(X), len(Y)))
 
         if args.distribution == "norm":
@@ -338,17 +338,17 @@ def call_data_generator(args):
                                                          association_type=association_type)
     create_dir(args.output)
     utilities.write_table(X, args.output + "/X_" + \
-                       association_type + "_" + str(number_features) + "_" + \
-                       str(number_samples) + ".txt", prefix="X", corner="#")
+                          association_type + "_" + str(number_features) + "_" + \
+                          str(number_samples) + ".txt", prefix="X", corner="#")
     utilities.write_table(Y, args.output + "/Y_" + \
-                       association_type + "_" + str(number_features) + "_" + \
-                       str(number_samples) + ".txt", prefix="Y", corner="#")
+                          association_type + "_" + str(number_features) + "_" + \
+                          str(number_samples) + ".txt", prefix="Y", corner="#")
     rowheader = ["X" + str(i) for i in range(len(X))]
     colheader = ["Y" + str(i) for i in range(len(Y))]
     utilities.write_table(A, args.output + "/A_" + \
-                       association_type + "_" + str(number_features) + "_" + \
-                       str(number_samples) + ".txt", rowheader=rowheader, colheader=colheader, \
-                       prefix="", corner="#")
+                          association_type + "_" + str(number_features) + "_" + \
+                          str(number_samples) + ".txt", rowheader=rowheader, colheader=colheader, \
+                          prefix="", corner="#")
 
 
 def happyface(x):

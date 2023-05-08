@@ -1,8 +1,9 @@
 import os
 import argparse
 import warnings
-from btest.viz import b_scatter
+from .viz import b_scatter
 import datetime
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser()

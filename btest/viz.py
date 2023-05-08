@@ -345,17 +345,17 @@ def heatmap(data_table, D=[], xlabels_order=[], xlabels=None, ylabels=[],
     ax1.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
     # Compute and plot second dendrogram.
     if len(D) > 0:
-        Y1 = linkage(D, method=linkage_method,  optimal_ordering=True)
+        Y1 = linkage(D, method=linkage_method, optimal_ordering=True)
     else:
         D = pdist(data_table, metric=stats.pDistance)
-        Y1 = linkage(D, method=linkage_method,  optimal_ordering=True)
+        Y1 = linkage(D, method=linkage_method, optimal_ordering=True)
     if len(Y1) > 1:
         try:
             Z1 = sch.dendrogram(Y1, orientation='left')
         except:
             print("Warning: dendrogram 1 in hetamap plot faced an exception!")
             pylab.close()
-            Y1 = linkage(D, method=linkage_method,  optimal_ordering=True)
+            Y1 = linkage(D, method=linkage_method, optimal_ordering=True)
             return Y1
     ax1.set_xticks([])
     ax1.set_yticks([])
@@ -368,7 +368,7 @@ def heatmap(data_table, D=[], xlabels_order=[], xlabels=None, ylabels=[],
         Y2 = []
         if not data_table is None:
             try:
-                Y2 = linkage(data_table.T, metric=stats.pDistance, method=linkage_method,  optimal_ordering=True)
+                Y2 = linkage(data_table.T, metric=stats.pDistance, method=linkage_method, optimal_ordering=True)
             except ValueError:
                 pass
         if len(Y2) > 1:
@@ -621,7 +621,7 @@ def scatter_matrix(df, x_size=0, filename=None, ):
     axs = pd.plotting.scatter_matrix(df, alpha=.0, s=10, c='white', \
                                      hist_kwds={'color': ['white']}, \
                                      range_padding=.1, grid=False, figsize=(
-        len(df.columns) * .25 + 3, len(df.columns) * .25 + 3))  # diagonal='kde', grid=False,
+            len(df.columns) * .25 + 3, len(df.columns) * .25 + 3))  # diagonal='kde', grid=False,
     # color scatters
     for i in range(len(axs[:, 0])):
         for j in range(len(axs[-1, :])):

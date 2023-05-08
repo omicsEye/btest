@@ -15,8 +15,8 @@ def readData(X_path, Y_Path, min_var=0.5):
     dataX = dataX.astype(float)
     dataY = dataY.astype(float)
 
-    dataX = dataX.loc[:,~dataX.columns.duplicated()]
-    dataY = dataY.loc[:,~dataY.columns.duplicated()]
+    dataX = dataX.loc[:, ~dataX.columns.duplicated()]
+    dataY = dataY.loc[:, ~dataY.columns.duplicated()]
 
     l1_before = len(dataX.columns)
     l2_before = len(dataY.columns)
@@ -32,8 +32,8 @@ def readData(X_path, Y_Path, min_var=0.5):
     l2_after = len(dataY.columns)
 
     # replace np.NaN's with 'NaN'
-    #dataX[dataX.isnull()] = 'NaN'
-    #dataY[dataY.isnull()] = 'NaN'
+    # dataX[dataX.isnull()] = 'NaN'
+    # dataY[dataY.isnull()] = 'NaN'
 
     if l1_before > l1_after:
         print("--- %d samples/columns with all missing values have been removed from the first dataset " % (
@@ -45,7 +45,7 @@ def readData(X_path, Y_Path, min_var=0.5):
 
     # find common samples
     ind = dataY.columns.intersection(dataX.columns)
-    #ind = list(set(set(dataX.columns) & set(dataY.columns)))
+    # ind = list(set(set(dataX.columns) & set(dataY.columns)))
     # filter to common samples
     dataX = dataX.loc[:, ind]
     dataY = dataY.loc[:, ind]
@@ -69,12 +69,13 @@ def readData(X_path, Y_Path, min_var=0.5):
     print('Dataset Y dimension  after cleaning: ', dataY.shape)
     valuesX = dataX.values
     valuesY = dataY.values
-    #dataAll = pd.concat([dataX, dataY])
+    # dataAll = pd.concat([dataX, dataY])
     featuresX = list(dataX.index)
     featuresY = list(dataY.index)
-    #dataAll = dataAll.values
+    # dataAll = dataAll.values
 
     return valuesX, valuesY, featuresX, featuresY
+
 
 def btest_corr_pandas(df, method='spearman', pval=False):
     results = pd.DataFrame()
@@ -89,9 +90,9 @@ def btest_corr_pandas(df, method='spearman', pval=False):
             for j in df.columns:
                 if i != j:
                     try:
-                        not_na = sum(df[[i, j]].count(axis=1)==2)
+                        not_na = sum(df[[i, j]].count(axis=1) == 2)
                         corr = spearmanr(df[i].to_numpy(), df[j].to_numpy(), nan_policy="omit")
-                        #corr = stats.kendalltau(ac, bc)
+                        # corr = stats.kendalltau(ac, bc)
                     except ValueError:
                         corr = ('nan', 'nan')
                         not_na = 'nan'
@@ -116,13 +117,16 @@ def btest_corr_pandas(df, method='spearman', pval=False):
         if pval:
             rho = df.corr(method='spearman')
             pval = df.corr(method=lambda x, y: spearmanr(x, y, nan_policy='omit')[1]) - np.eye(*rho.shape)
-            pval_long_format = pval.stack().reset_index().rename(columns={'level_0':'Feature_1','level_1':'Feature_2', 0:'pval'})
-            rho_long_format = rho.stack().reset_index().rename(columns={'level_0':'Feature_1','level_1':'Feature_2', 0:'Correlation'})
+            pval_long_format = pval.stack().reset_index().rename(
+                columns={'level_0': 'Feature_1', 'level_1': 'Feature_2', 0: 'pval'})
+            rho_long_format = rho.stack().reset_index().rename(
+                columns={'level_0': 'Feature_1', 'level_1': 'Feature_2', 0: 'Correlation'})
             results = pd.concat([pval_long_format, rho_long_format["Correlation"]], axis=1)
             results['Not_NAs'] = 'nan'
         else:
             rho = df.corr(method='spearman')
-            rho_long_format = rho.stack().reset_index().rename(columns={'level_0':'Feature_1','level_1':'Feature_2', 0:'Correlation'})
+            rho_long_format = rho.stack().reset_index().rename(
+                columns={'level_0': 'Feature_1', 'level_1': 'Feature_2', 0: 'Correlation'})
             results = rho_long_format
             results['pval'] = 'nan'
             results['Not_NAs'] = 'nan'
@@ -243,16 +247,16 @@ def melter(dat, val):
     dat.reset_index(inplace=True)
     dat.rename({'index': 'Feature_1'}, axis=1, inplace=True)
     dat = pd.melt(dat, id_vars='Feature_1',
-                        value_vars=dat[1:],
-                        var_name='Feature_2', value_name=val)
+                  value_vars=dat[1:],
+                  var_name='Feature_2', value_name=val)
     return dat
 
 
 def btest_corr(dataAll, features, features_y=None, method='spearman', fdr=0.1, Type='X_Y'):
     corrleationMethod = corrMethod[method]
     if Type == 'X_Y':
-        features = [str(f)+'_X' for f in features]
-        features_y = [str(f)+'_Y' for f in features_y]
+        features = [str(f) + '_X' for f in features]
+        features_y = [str(f) + '_Y' for f in features_y]
         features_y = features + features_y
     else:
         features_y = features
@@ -270,17 +274,17 @@ def btest_corr(dataAll, features, features_y=None, method='spearman', fdr=0.1, T
     for i in range(len(features_y)):
         valid = mask[0] & mask
         valid = valid.sum(axis=1)
-        valid_obs[i,i:] = valid
-        valid_obs[i:,i] = valid
+        valid_obs[i, i:] = valid
+        valid_obs[i:, i] = valid
         mask = np.delete(mask, 0, 0)
 
-    #print("obs count time: ", time.time()-t_mask)
+    # print("obs count time: ", time.time()-t_mask)
     valid_obs = pd.DataFrame(valid_obs, columns=features_y, index=features_y)
 
     # create long dataframes
     # prepare report dataframe
     t_long = time.time()
-    check = np.triu(np.ones((dataAll2.shape[1],dataAll2.shape[1])), k=1).astype(bool)
+    check = np.triu(np.ones((dataAll2.shape[1], dataAll2.shape[1])), k=1).astype(bool)
     df_f = cr.where(check).stack().reset_index()
     df_f.columns = ['Feature_1', 'Feature_2', 'Correlation']
 
@@ -289,55 +293,56 @@ def btest_corr(dataAll, features, features_y=None, method='spearman', fdr=0.1, T
 
     # print("long transform time: ", time.time()-t_long)
     # prepare place holders for other values
-    df_f.loc[:,'t_statistic'] = None
-    df_f.loc[:,'pval'] = None
-    df_f.loc[:,'P_adjusted'] = None
-    df_f.loc[:,'bh_fdr_threshold'] = None
+    df_f.loc[:, 't_statistic'] = None
+    df_f.loc[:, 'pval'] = None
+    df_f.loc[:, 'P_adjusted'] = None
+    df_f.loc[:, 'bh_fdr_threshold'] = None
 
     # calculate t-statistic based on the correlation and degrees of freedom
     t_pval = time.time()
-    df_f.loc[:, 't_statistic'] = (df_f.loc[:, 'Correlation']*
-                                 (df_f.loc[:, 'complete_obs']-2)**.5) /\
-                                (1-df_f.loc[:, 'Correlation']**2)**.5
+    df_f.loc[:, 't_statistic'] = (df_f.loc[:, 'Correlation'] *
+                                  (df_f.loc[:, 'complete_obs'] - 2) ** .5) / \
+                                 (1 - df_f.loc[:, 'Correlation'] ** 2) ** .5
     # calculate p-values based on the t-statistic and degrees of freedom
     df_f.loc[:, 'pval'] = 2 * (1 - t.cdf(abs(df_f.loc[:, 't_statistic']),
-                                         df=df_f.loc[:, 'complete_obs']-2))
-    #print("p-value time: ", time.time()-t_pval)
+                                         df=df_f.loc[:, 'complete_obs'] - 2))
+    # print("p-value time: ", time.time()-t_pval)
 
     # calculate adjusted p-values
     t_bh = time.time()
     p_adust, p_threshold = bh(df_f.loc[:, 'pval'].values, fdr)
     df_f.loc[:, 'P_adjusted'] = p_adust
     df_f.loc[:, 'bh_fdr_threshold'] = p_threshold
-    #print("bh time: ", time.time()-t_bh)
+    # print("bh time: ", time.time()-t_bh)
 
     t_names = time.time()
     if Type == 'X_Y':
-        df_f.loc[:, 'Type'] = df_f.Feature_1.str[-1]+df_f.Feature_2.str[-2:]
+        df_f.loc[:, 'Type'] = df_f.Feature_1.str[-1] + df_f.Feature_2.str[-2:]
         df_f.loc[:, 'Feature_1'] = df_f.Feature_1.str[:-2]
         df_f.loc[:, 'Feature_2'] = df_f.Feature_2.str[:-2]
 
     else:
         df_f.loc[:, 'Type'] = Type
 
-    #print("names time: ", time.time()-t_names)
+    # print("names time: ", time.time()-t_names)
 
     t_sort = time.time()
     df_f = df_f.sort_values(['pval', 'Correlation'],
                             ascending=[True, False])
-    #print("sort time: ", time.time()-t_sort)
+    # print("sort time: ", time.time()-t_sort)
 
     df_f = df_f.sort_values(['pval', 'Correlation'],
-                                  ascending=[True, False])
+                            ascending=[True, False])
 
     return df_f
+
 
 def write_results(results, name, outputpath):
     os.makedirs(outputpath, exist_ok=True)
     if results is not None:
         results.to_csv(outputpath + '/' + name + '.tsv', sep="\t")
         # rho_data = pd.pivot(results, index="Feature_1", columns="Feature_2", values='Correlation') #Reshape from long to wide
-        #rho_data.to_csv(outputpath + '/'+name+'.tsv', sep="\t")
+        # rho_data.to_csv(outputpath + '/'+name+'.tsv', sep="\t")
 
 
 def remove_missing_values(x, y):
@@ -345,32 +350,39 @@ def remove_missing_values(x, y):
     '''
     # nan != nan = TRUE
     nas = np.logical_or(x != x, y != y)
-    return(x[~nas], y[~nas])
+    return (x[~nas], y[~nas])
+
+
 def pearson(x, y):
     x, y = remove_missing_values(x, y)
     if (np.unique(x).shape[0] == 1 or np.unique(y).shape[0] == 1):
-        return(0,1)
+        return (0, 1)
     corr, pval = pearsonr(x, y)
-    return(corr, pval)
+    return (corr, pval)
+
 
 def spearman(x, y):
     x, y = remove_missing_values(x, y)
-    if (np.unique(x).shape[0] <= 2 or np.unique(y).shape[0] <=2 ):
-        return(0,1)
+    if (np.unique(x).shape[0] <= 2 or np.unique(y).shape[0] <= 2):
+        return (0, 1)
     corr, pval = spearmanr(x, y)
-    return(corr, pval)
+    return (corr, pval)
+
 
 def pearson(x, y):
     x, y = remove_missing_values(x, y)
     if (np.unique(x).shape[0] <= 2 or np.unique(y).shape[0] <= 2):
-        return(0,1)
+        return (0, 1)
     corr, pval = pearsonr(x, y)
-    return(corr, pval)
-def kendall(x,y):
+    return (corr, pval)
+
+
+def kendall(x, y):
     x, y = remove_missing_values(x, y)
     if (np.unique(x).shape[0] <= 1 or np.unique(y).shape[0] <= 1):
         return (0, 1)
     corr, pval = kendalltau(x, y)
     return (corr, pval)
 
-corrMethod = {"spearman" : spearman, "pearson": pearson, "kendall":kendall}
+
+corrMethod = {"spearman": spearman, "pearson": pearson, "kendall": kendall}

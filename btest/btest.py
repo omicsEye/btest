@@ -1,7 +1,14 @@
 #!/usr/bin/env python
-# user options handling plus check the requirements
 import sys
+import argparse
+import csv
+import datetime
+import logging
+import os
+import time
+import pandas as pd
 
+# user options handling plus check the requirements
 # Check the python version
 REQUIRED_PYTHON_VERSION_MAJOR = [2, 3]
 REQUIRED_PYTHON_VERSION_MINOR2 = 7
@@ -22,14 +29,6 @@ except (AttributeError, IndexError):
              "does not match the version required (version " +
              str(REQUIRED_PYTHON_VERSION_MAJOR) + "." +
              str(REQUIRED_PYTHON_VERSION_MINOR) + "+)")
-
-import argparse
-import csv
-import datetime
-import logging
-import os
-import time
-import pandas as pd
 
 # Test if numpy is installed
 try:
@@ -98,12 +97,14 @@ def check_requirements(args):
 
     print("Output files will be written to: " + output_dir)
 
+
 def set_parameters(args):
     '''
     Set the user command line options to config file
     to be used in the program
     '''
     config.output_dir = args.output_dir
+
 
 def parse_arguments(args):
     """
@@ -139,7 +140,7 @@ def parse_arguments(args):
         "-m",
         dest="strMetric",
         default='spearman',
-        choices=[ "pearson", "spearman", "kendall"],
+        choices=["pearson", "spearman", "kendall"],
         help="metric to be used for similarity measurement\n[default = 'spearman']")
 
     argp.add_argument(
@@ -182,6 +183,7 @@ def parse_arguments(args):
 
     return argp.parse_args()
 
+
 def write_config(args):
     try:
         btest_log_file = open(str(args.output_dir) + '/btest.log', 'w')
@@ -194,6 +196,8 @@ def write_config(args):
     csvw.writerow(["Minimum variance for filtering threshold in datasetes : ", args.min_var])
     csvw.writerow([])
     btest_log_file.close()
+
+
 def btest(X_path, Y_path,
           outputpath,
           method='spearman',
@@ -243,8 +247,8 @@ def btest(X_path, Y_path,
     print("btest task completed successfully!!!")
     return X_X, Y_Y, X_Y
 
-def main():
 
+def main():
     # Parse arguments from command line
     args = parse_arguments(sys.argv)
 
@@ -254,7 +258,7 @@ def main():
     # check the requirements based on need for parameters
     check_requirements(args)
 
-    logging.basicConfig(filename=args.output_dir+'/btest.log', level=logging.INFO)
+    logging.basicConfig(filename=args.output_dir + '/btest.log', level=logging.INFO)
 
     write_config(args)
 
@@ -265,4 +269,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

@@ -1,26 +1,14 @@
 #!/usr/bin/env python
 
-"""
-Adopted from hallagram written by:
-Author: Eric Franzosa (eric.franzosa@gmail.com)
-        Ali Rahnavard (gholamali.rahnavard@gmail.com)
-"""
-
 import os
 import sys
 import argparse
 import csv
 import pandas as pd
 import getpass
-
-try:
-    csv.field_size_limit(sys.maxsize)
-except:
-    # for some Windows platforms
-    csv.field_size_limit(2147483647)
+import matplotlib
 
 # import matbtestlib.pyplot as plt
-import matplotlib
 
 # matplotlib.style.use('ggplot')
 matplotlib.use("Agg")
@@ -41,6 +29,18 @@ with warnings.catch_warnings():
         matplotlib.rcParams["font.family"] = "Arial"
     except UserWarning:
         pass
+
+"""
+Adopted from hallagram written by:
+Author: Eric Franzosa (eric.franzosa@gmail.com)
+        Bahar Sayoldin (bahar.sayoldin@gmail.com)
+"""
+
+try:
+    csv.field_size_limit(sys.maxsize)
+except:
+    # for some Windows platforms
+    csv.field_size_limit(2147483647)
 
 # paper size
 '''
@@ -98,7 +98,7 @@ class Table:
                     self.colheads = values
                 else:
                     self.rowheads.append(rowhead)
-                    values = [np.nan if x=='' else x for x in values]
+                    values = [np.nan if x == '' else x for x in values]
                     self.data.append(list(map(float, values)))
         self.data = np.array(self.data)
         self.update()
@@ -127,7 +127,7 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("simtable",
                         help="table of pairwise similarity scores")
-    #parser.add_argument("tree",
+    # parser.add_argument("tree",
     #                    help="hypothesis tree (for getting feature order)")
     parser.add_argument("associations",
                         help="btest associations")
@@ -167,11 +167,12 @@ def get_order(path):
                 break
     return [row_order, col_order]
 
-def load_order_table(p_table, associations, strongest = 100, p_tree = None):
+
+def load_order_table(p_table, associations, strongest=100, p_tree=None):
     allowed_rowheads = {k for items in associations for k in items[1]}
     allowed_colheads = {k for items in associations for k in items[2]}
     simtable = Table(p_table)
-    row_order, col_order = simtable.rowheads, simtable.colheads # get_order(p_tree)
+    row_order, col_order = simtable.rowheads, simtable.colheads  # get_order(p_tree)
 
     # reorder the rows
     row_order = [simtable.rowmap[k] for k in row_order if k in simtable.rowmap and k in allowed_rowheads]
@@ -185,9 +186,11 @@ def load_order_table(p_table, associations, strongest = 100, p_tree = None):
     simtable.update()
     return simtable
 
+
 def cluster_order_table(pairs):
     pairs = pd.DataFrame(pairs)
-    simtable = pd.pivot(pairs, index="Feature_1", columns="Feature_2", values='Correlation')  # Reshape from long to wide
+    simtable = pd.pivot(pairs, index="Feature_1", columns="Feature_2",
+                        values='Correlation')  # Reshape from long to wide
 
 
 def load_associations(path, largest=None, strongest=100, orderby='similarity'):
@@ -236,8 +239,8 @@ def plot(simtable, associations, cmap, mask, axlabels, outfile, similarity):
     simtable.data = simtable.data[order, :]
     simtable.update()
     # scale of the data
-    tmin = -1 # if we want to use the min in the study #np.min(simtable.data,)
-    tmax = 1 # if we want to use the max in the study np.max(simtable.data)
+    tmin = -1  # if we want to use the min in the study #np.min(simtable.data,)
+    tmax = 1  # if we want to use the max in the study np.max(simtable.data)
     crit = 0
     while crit < max(abs(tmin), tmax):
         crit += c_simstep
@@ -325,7 +328,7 @@ def plot(simtable, associations, cmap, mask, axlabels, outfile, similarity):
                 edgecolor="black",
                 linewidth=c_line_width,
                 clip_on=False,
-                )
+            )
         )
         # label
         text = str(number)
@@ -344,7 +347,7 @@ def plot(simtable, associations, cmap, mask, axlabels, outfile, similarity):
             ha="center",
             va="center",
             weight="bold",
-            )
+        )
         text.set_path_effects([
             path_effects.Stroke(linewidth=c_outline_width, foreground='black'),
             path_effects.Normal(),
