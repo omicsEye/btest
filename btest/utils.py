@@ -144,16 +144,23 @@ def fdr(p_vals):
 
 def bh(p, q):
     from scipy.stats import rankdata
-    pRank = rankdata(p, method='ordinal')
-    m = len(p)
-    p_adust = p * len(p) * 1.0 / (pRank * 1.0)
+    pRank = rankdata(p, method='ordinal', nan_policy = 'omit')
+
+    #print(len(pRank))
+    #print(len(p))
+    # we used max(pRank) instead dof len(p) since p can have nan and len(p) could be greater than max(pRank)
+    m =  max(pRank) #
+    #print(max(p)* m / max(pRank))
+    p_adusted = p * m / pRank
+    #print(max(p_adusted))
     max_i = 0
-    p_threshold = p[0]
+    bh_fdr_threshold = p[0]
+    import math
     for i in range(len(p)):
-        if p_adust[i] <= q and max_i <= pRank[i]:
+        if p_adusted[i] <= q and max_i <= pRank[i]:
             max_i = pRank[i]
-            p_threshold = p[i]
-    return p_adust, p_threshold
+            bh_fdr_threshold = p[i]
+    return p_adusted, bh_fdr_threshold
 
 
 # def btest_corr(dataAll, features, features_y=None, method='spearman', fdr=0.1, Type='X_Y'):
@@ -307,9 +314,10 @@ def btest_corr(dataAll, features, features_y=None, method='spearman', fdr=0.1, T
 
     # calculate adjusted p-values
     t_bh = time.time()
-    p_adust, p_threshold = bh(df_f.loc[:, 'pval'].values, fdr)
-    df_f.loc[:, 'P_adjusted'] = p_adust
-    df_f.loc[:, 'bh_fdr_threshold'] = p_threshold
+    p_adusted, bh_fdr_threshold = bh(df_f.loc[:, 'pval'].values, fdr)
+    #print(p_adusted, bh_fdr_threshold)
+    df_f.loc[:, 'P_adjusted'] = p_adusted
+    df_f.loc[:, 'bh_fdr_threshold'] = bh_fdr_threshold
     # print("bh time: ", time.time()-t_bh)
 
     t_names = time.time()
