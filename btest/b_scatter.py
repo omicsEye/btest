@@ -12,7 +12,7 @@ def parse_arguments():
     parser.add_argument('--datay', '-y', help="path to dataY", type=str, required=True)
     parser.add_argument('--b_test', '-b', help="path to b_test results", type=str, required=True)
     parser.add_argument('--ind', '-i', help="list of indexes starting from zero to plot in format 1,2,3,...",
-                        type=str, required=True)
+                        type=int, nargs='+', required=True)
     parser.add_argument('--out', '-o', help="path to output directory",
                         type=str, required=True)
     parser.add_argument('--min', '-m', help="minimum var to include", type=int, default=0)
