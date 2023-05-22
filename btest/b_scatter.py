@@ -11,8 +11,8 @@ def parse_arguments():
     parser.add_argument('--datax', '-x', help="path to dataX", type=str, required=True)
     parser.add_argument('--datay', '-y', help="path to dataY", type=str, required=True)
     parser.add_argument('--b_test', '-b', help="path to b_test results", type=str, required=True)
-    parser.add_argument('--ind', '-i', help="list of indexes starting from zero to plot in format 1,2,3,...",
-                        type=int, nargs='+', required=True)
+    parser.add_argument('--ind', '-i', help="list of indexes starting from zero to plot in format 1,2,3,... or 1-10",
+                        type=str, required=True)
     parser.add_argument('--out', '-o', help="path to output directory",
                         type=str, required=True)
     parser.add_argument('--min', '-m', help="minimum var to include", type=int, default=0)
@@ -28,8 +28,12 @@ def main():
     dt_label = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     output_dir = str(args.out + '_' + dt_label)
     os.makedirs(output_dir)
-
-    n_ind = args.ind.split(',')
+    print(args.ind)
+    if '-' in args.ind:
+        start, end = args.ind.split('-')
+        n_ind = range(int(start),int(end))
+    elif ',' in args.ind:
+        n_ind = args.ind.split(',')
     n_ind = list(map(int, n_ind))
     b_scatter(args.datax, args.datay, b_test=args.b_test,
               n_ind=n_ind,
