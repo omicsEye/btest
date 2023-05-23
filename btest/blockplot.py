@@ -162,8 +162,8 @@ def get_order(path):
     with open(path) as fh:
         for row in csv.reader(fh, dialect="excel-tab"):
             if row[0] == "0":
-                row_order = row[1].split(";")
-                col_order = row[2].split(";")
+                row_order = row[1].split("|")
+                col_order = row[2].split("|")
                 break
     return [row_order, col_order]
 
@@ -200,7 +200,7 @@ def load_associations(path, largest=None, strongest=100, orderby='similarity'):
     with open(path) as fh:
         for row in csv.reader(fh, dialect="excel-tab"):
             if row[0] != '' and row[dic_order[orderby]] != '':
-                pairs.append([row[0], row[1].split(";"), row[2].split(";"), row[3], row[4], row[6]])
+                pairs.append([row[0], row[1].split("|"), row[2].split("|"), row[3], row[4], row[6]])
     if largest is not None and strongest is not None:
         sys.exit("Can only specify one of LARGEST and STRONGEST")
     elif largest is not None:

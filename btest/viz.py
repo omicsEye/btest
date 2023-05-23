@@ -718,50 +718,53 @@ def b_scatter(dataX, dataY, b_test, n_ind, min_var=0, output_dir='.'):
         b_test = pd.read_csv(b_test, delimiter='\t')
 
     for n in n_ind:
-        row = b_test.iloc[n, :]
-        var1 = row.loc['Feature_1']
-        var2 = row.loc['Feature_2']
+        try:
+            row = b_test.iloc[n, :]
+            var1 = row.loc['Feature_1']
+            var2 = row.loc['Feature_2']
 
-        comp_type = row.loc['Type']
-        var1_ind = featureX.index(var1)
-        var2_ind = featureY.index(var2)
+            comp_type = row.loc['Type']
+            var1_ind = featureX.index(var1)
+            var2_ind = featureY.index(var2)
 
-        text_dict = {}
-        text_ann = ''
-        for key in ['Correlation', 'complete_obs', 'P_adjusted']:
-            text_dict[key] = row.loc[key]
-            text_ann = text_ann + key + ': ' + str(round(row.loc[key], 3)) + '\n'
+            text_dict = {}
+            text_ann = ''
+            for key in ['Correlation', 'complete_obs', 'P_adjusted']:
+                text_dict[key] = row.loc[key]
+                text_ann = text_ann + key + ': ' + str(round(row.loc[key], 3)) + '\n'
 
-        if comp_type == 'X_X':
-            var1_val = dataX[var1_ind]
-            var2_val = dataX[var2_ind]
-        elif comp_type == 'X_Y':
-            var1_val = dataX[var1_ind]
-            var2_val = dataY[var2_ind]
-        else:
-            var1_val = dataY[var1_ind]
-            var2_val = dataY[var2_ind]
+            if comp_type == 'X_X':
+                var1_val = dataX[var1_ind]
+                var2_val = dataX[var2_ind]
+            elif comp_type == 'X_Y':
+                var1_val = dataX[var1_ind]
+                var2_val = dataY[var2_ind]
+            else:
+                var1_val = dataY[var1_ind]
+                var2_val = dataY[var2_ind]
 
-        fig, ax = plt.subplots(1, 1, figsize=(2.4, 2.4), dpi=300)
-        plt.scatter(x=var1_val, y=var2_val,
-                    edgecolors='#000',
-                    linewidths=.25,
-                    c='#123435',
-                    alpha=.5,
-                    s=10,
-                    marker="o")
-        ax.xaxis.set_tick_params(labelsize=6)
-        ax.yaxis.set_tick_params(labelsize=6)
-        plt.xlabel(var1, fontsize=8, fontweight='bold')
-        plt.ylabel(var2, fontsize=8, fontweight='bold')
-        if text_dict['Correlation'] > 0:
-            plt.text(0.02, .7, text_ann, fontstyle='italic',
-                     transform=ax.transAxes, fontsize=7)
-        else:
-            plt.text(0.5, 0.7, text_ann, fontstyle='italic',
-                     transform=ax.transAxes, fontsize=7)
-        ax.spines['right'].set_visible(False)
-        ax.spines['top'].set_visible(False)
-        plt.savefig(str(output_dir + '/' + var1 + '_' + var2 + '.pdf'), bbox_inches='tight')
+            fig, ax = plt.subplots(1, 1, figsize=(2.4, 2.4), dpi=300)
+            plt.scatter(x=var1_val, y=var2_val,
+                        edgecolors='#000',
+                        linewidths=.25,
+                        c='#123435',
+                        alpha=.5,
+                        s=10,
+                        marker="o")
+            ax.xaxis.set_tick_params(labelsize=6)
+            ax.yaxis.set_tick_params(labelsize=6)
+            plt.xlabel(var1, fontsize=8, fontweight='bold')
+            plt.ylabel(var2, fontsize=8, fontweight='bold')
+            if text_dict['Correlation'] > 0:
+                plt.text(0.02, .7, text_ann, fontstyle='italic',
+                         transform=ax.transAxes, fontsize=7)
+            else:
+                plt.text(0.5, 0.7, text_ann, fontstyle='italic',
+                         transform=ax.transAxes, fontsize=7)
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+            plt.savefig(str(output_dir + '/' + var1 + '_' + var2 + '.pdf'), bbox_inches='tight')
+        except:
+            print(var1, var2)
         # plt.show()
     return 'Done'

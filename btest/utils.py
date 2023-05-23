@@ -154,13 +154,13 @@ def bh(p, q):
     p_adusted = p * m / pRank
     #print(max(p_adusted))
     max_i = 0
-    bh_fdr_threshold = p[0]
+    critical_bh_pval = p[0]
     import math
     for i in range(len(p)):
         if p_adusted[i] <= q and max_i <= pRank[i]:
             max_i = pRank[i]
-            bh_fdr_threshold = p[i]
-    return p_adusted, bh_fdr_threshold
+            critical_bh_pval = p[i]
+    return p_adusted, critical_bh_pval
 
 
 # def btest_corr(dataAll, features, features_y=None, method='spearman', fdr=0.1, Type='X_Y'):
@@ -191,7 +191,7 @@ def bh(p, q):
 #     p_adust, p_threshold = bh(results["pval"].values, fdr)
 #
 #     results["P_adusted"] = p_adust
-#     results["bh_fdr_threshold"] = p_threshold
+#     results["critical_bh_pval"] = p_threshold
 #     results['Type'] = Type
 #     results = results.sort_values(['pval', 'Correlation'],
 #                           ascending=[True, False])
@@ -243,7 +243,7 @@ def bh(p, q):
 #     p_adust, p_threshold = bh(results["pval"].values, fdr)
 #
 #     results["P_adusted"] = p_adust
-#     results["bh_fdr_threshold"] = p_threshold
+#     results["critical_bh_pval"] = p_threshold
 #     results['Type'] = Type
 #     results = results.sort_values(['pval', 'Correlation'],
 #                                   ascending=[True, False])
@@ -300,7 +300,7 @@ def btest_corr(dataAll, features, features_y=None, method='spearman', fdr=0.1, T
     df_f.loc[:, 't_statistic'] = None
     df_f.loc[:, 'pval'] = None
     df_f.loc[:, 'P_adjusted'] = None
-    df_f.loc[:, 'bh_fdr_threshold'] = None
+    df_f.loc[:, 'critical_bh_pval'] = None
 
     # calculate t-statistic based on the correlation and degrees of freedom
     t_pval = time.time()
@@ -314,10 +314,10 @@ def btest_corr(dataAll, features, features_y=None, method='spearman', fdr=0.1, T
 
     # calculate adjusted p-values
     t_bh = time.time()
-    p_adusted, bh_fdr_threshold = bh(df_f.loc[:, 'pval'].values, fdr)
-    #print(p_adusted, bh_fdr_threshold)
+    p_adusted, critical_bh_pval = bh(df_f.loc[:, 'pval'].values, fdr)
+    #print(p_adusted, critical_bh_pval)
     df_f.loc[:, 'P_adjusted'] = p_adusted
-    df_f.loc[:, 'bh_fdr_threshold'] = bh_fdr_threshold
+    df_f.loc[:, 'critical_bh_pval'] = critical_bh_pval
     # print("bh time: ", time.time()-t_bh)
 
     t_names = time.time()
