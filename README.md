@@ -204,6 +204,14 @@ To test if btest is installed correctly, you may run the following command in th
 ```#!cmd
 btest -h
 ```
+
+Example command from a real study:
+
+```
+btest -X BCAA.tsv -Y lipoproteins.tsv -o btest_BCCA --fdr 0.05 --diagnostics-plot
+blockplot btest_BCCA/simtable.tsv btest_BCCA/X_Y.tsv --strongest 100 --similarity Spearman --axlabels "BCAAs" "Lipoproteins" --outfile btest_BCCA/hetamap_100.pdf
+b_scatter --datax BCAA.tsv --datay lipoproteins.tsv --b_test btest_BCCA/X_Y.tsv --ind 0-440 --out btest_BCCA/scatters
+```
 Which yields btest command line options.
 ```commandline
 usage: btest [-h] [--version] -X <input_dataset_1.txt> [-Y <input_dataset_2.txt>] -o <output> [-m {pearson,spearman,kendall}] [--fdr FDR] [--var MIN_VAR] [-v VERBOSE] [--diagnostics-plot]
