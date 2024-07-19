@@ -15,10 +15,11 @@ Bahar Sayoldin, Mahdi Baghbanzadeh, Keith A. Crandall,  Ali Rahnavard, *btest: l
 _`btest`_ combines block nonparametric hypothesis testing with false discovery rate correction to 
 enable high-sensitivity discovery of linear and non-linear associations in high-dimensional datasets 
 (which may be categorical, continuous, or mixed). btest perform test by: 
-1) adjust data to covariates, 
-2) hierarchically clustering to pair block of significantly associated features, 
-3) provide informative association by incorporating within data sets and among data sets relationships, and
-4) high quality visualization of data. 
+1) Rapid correlation test for interdimensional paired omic datasets.  
+3) Providing informative association by incorporating within data sets and among data sets relationships.
+4) Clustering associations to form block of significantly associated features.
+5) Generating high quality visualization of data. 
+6) Providing guideline for adjust data to covariates. 
 
 ---
 Please join the community discussion forum at [omicsEye/btest](https://forum.omicseye.org/)  
@@ -265,29 +266,18 @@ This command upgrades btest to the latest version and ignores updating btest's d
 When btest is completed, three main output files will be created:
 
 ### 1. Associations file ###
-
-``` 
-| association_rank | cluster1                | cluster1_similarity_score | cluster2                | cluster2_similarity_score | pvalue   | qvalue      | similarity_score_between_clusters |
-|------------------|-------------------------|---------------------------|-------------------------|---------------------------|----------|-------------|-----------------------------------|
-| 1                | X30;X31                 | 0.738949895               | Y30;Y31                 | 0.562388239               | 3.33E-37 | 2.81E-34    | -0.900426043                      |
-| 2                | X7;X10;X11;X9;X6;X8     | 0.521149715               | Y7;Y10;Y11;Y8;Y6;Y9     | 0.478449445               | 6.91E-32 | 2.92E-29    | -0.870183018                      |
-| 3                | X16;X17;X15;X13;X12;X14 | 0.466724272               | Y16;Y13;Y17;Y15;Y12;Y14 | 0.400633663               | 2.94E-31 | 8.28E-29    | -0.866006601                      |
-| 4                | X1;X3;X2;X4;X0;X5       | 0.567457546               | Y3;Y1;Y5;Y2;Y0;Y4       | 0.458731473               | 1.33E-28 | 2.81E-26    | -0.846672667                      |
-| 5                | X28;X27;X26;X25;X24;X29 | 0.502168617               | Y27;Y28;Y25;Y26;Y24;Y29 | 0.414425443               | 4.91E-26 | 8.30E-24    | -0.825058506                      |
-| 6                | X22;X20;X23;X19;X18;X21 | 0.511786379               | Y20;Y21;Y18;Y22;Y19;Y23 | 0.415246325               | 3.39E-23 | 4.77E-21    | -0.797119712                      |
-| 7                | X0;X5                   | 0.781482148               | Y20                     | 1                         | 9.12E-05 | 0.011005714 | 0.381206121                       |
 ```
-
+```
 *   File name: `` $OUTPUT_DIR/associations.txt ``
 *   This file details the associations. Features are grouped in clusters that participated in an association with another cluster.
-*    **```association_rank```**: associations are sorted by high similarity score and low p-values.
-*    **```cluster1```**: has one or more homogenous features from the first dataset that participate in the association.
-*    **```cluster1_similarity_score```**: this value is corresponding to `1 - condensed distance` of the cluster in the hierarchy of the first dataset.
-*    **```cluster2```**: has one or more homogenous features from the second dataset that participate in the association.
-*    **```cluster2_similarity_score```**: this value is corresponding to `1 - condensed distance` of the cluster in the hierarchy of the second dataset.
-*    **```pvalue```**: p-value from Benjamini-Hochbergapproach used to assess the statistical significance of the mutual information distance.
-*    **```qvalue```**: q value calculates after BH correction for each test.
-*    **```similarity_score_between_clusters```**: is the similarity score of the representatives (medoids) of two clusters in the association.
+*    **```Feature_1```**: a feature from the first dataset that participate in the association.
+*    **```Feature_2```**: a feature from the second dataset that participate in the association.
+*    **```Correlation coefficient ```**: from correlation test.
+*    **```complete_obs```**: number of complete between two features.
+*    **```t_statistics```**: test statistics.
+*    **```pvalue```**: from correlation test.
+*    **```P_adjusted```**: adjusted p-value (observed fdr).
+*    **```critical_bh_pval```**: target FDR for benjamini hochberg approach.
 
 ## Output files ##
 1. [First dataset heatmap](#1-first-dataset-heatmap)
@@ -346,8 +336,6 @@ lmer(metabolite ~ age, metabolites_data = table)
 
 
 ```
-#!python
-
 lmer(microbe ~ 1 + (1 | subject) + time, microbial_abundance_data = table)
 ```
 
@@ -510,8 +498,6 @@ if __name__ == "__main__":
 We have implemented both empirical cumulative distribution function (ECDF) and fast and accurate approach, generalized Pareto distribution (GPD) by Knijnenburg et al. 2009, permutation test. The function can be imported to other python programs :
 
 ```
-#!python
-
 from btest.stats import permutation_test_pvalue 
 import numpy as np
 
@@ -545,89 +531,3 @@ The parameters that can be provided to the permutation test for calculating p-va
 * `permutation_func` can be either 'ECDF' or 'GPD'
 * `similarity_method` a similarity metric supported by btest (check what are the choices by 'btest -h')
 * `seed` if -1 each run seeds a random value, 0 uses the same seed any place does permutation.
-
-
-
-##### Complete btest option list #####
-```
-usage: btest [-h] [--version] -X <input_dataset_1.txt> [-Y <input_dataset_2.txt>] -o <output> [-q <.1>] [--fnt <.25>] [-p {ecdf,gpd,none}] [-a {block,pair}] [-i <1000>] [-m {nmi,ami,mic,dmic,dcor,pearson,spearman,r2,chi,mi}]
-             [--fdr {bh,by,y,meinshausen,bonferroni,no_adjusting}] [-v VERBOSE] [--diagnostics-plot] [--discretizing {equal-freq,hclust,jenks,none}] [--linkage {single,average,complete,weighted}] [--generate-one-null-samples] [--header]
-             [--format-feature-names] [--nproc <1>] [--nbin <None>] [-s SEED] [-e ENTROPY_THRESHOLD] [-e1 ENTROPY_THRESHOLD1] [-e2 ENTROPY_THRESHOLD2] [--missing-char MISSING_CHAR] [--fill-missing {mean,median,most_frequent}]
-             [--missing-data-category] [--write-hypothesis-tree] [-t {log,sqrt,arcsin,arcsinh,}]
-
-btest: block-wise association testing
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --version             show program's version number and exit
-  -X <input_dataset_1.txt>
-                        first file: Tab-delimited text input file, one row per feature, one column per measurement
-                        [REQUIRED]
-  -Y <input_dataset_2.txt>
-                        second file: Tab-delimited text input file, one row per feature, one column per measurement
-                        [default = the first file (-X)]
-  -o <output>, --output <output>
-                        directory to write output files
-                        [REQUIRED]
-  -q <.1>, --q-value <.1>
-                        q-value for overall significance tests (cut-off for false discovery rate)
-                        [default = 0.1]
-  --fnt <.25>           Estimated False Negative Tolerance in block association
-                        [default = 0.25]
-  -p {ecdf,gpd,none}, --permutation {ecdf,gpd,none}
-                        permutation function 
-                        [default = none for Spearman and Pearson and gpd for other]
-  -a {block,pair}, --descending {block,pair}
-                        descending approach
-                        [default = block for block-wise association testing]
-  -i <1000>, --iterations <1000>
-                        iterations for nonparametric significance testing (permutation test)
-                        [default = 1000]
-  -m {nmi,ami,mic,dmic,dcor,pearson,spearman,r2,chi,mi}, --metric {nmi,ami,mic,dmic,dcor,pearson,spearman,r2,chi,mi}
-                        metric to be used for similarity measurement
-                        [default = '']
-  --fdr {bh,by,y,meinshausen,bonferroni,no_adjusting}
-                        approach for FDR correction
-                        [default = bh]
-  -v VERBOSE, --verbose VERBOSE
-                        additional output is printed
-  --diagnostics-plot    Diagnostics plot for associations 
-  --discretizing {equal-freq,hclust,jenks,none}
-                        approach for discretizing continuous data
-                        [default = equal-freq]
-  --linkage {single,average,complete,weighted}
-                        The method to be used in linkage hierarchical clustering.
-  --generate-one-null-samples, --fast
-                        Use one null distribution for permutation test
-  --header              the input files contain a header line
-  --format-feature-names
-                        Replaces special characters and for OTUs separated  by | uses the known end of a clade
-  --nproc <1>           the number of processing units available
-                        [default = 1]
-  --nbin <None>         the number of bins for discretizing 
-                        [default = None]
-  -s SEED, --seed SEED  a seed number to make the random permutation reproducible
-                        [default = 0,and -1 for random number]
-  -e ENTROPY_THRESHOLD, --entropy ENTROPY_THRESHOLD
-                        Minimum entropy threshold to filter features with low information
-                        [default = 0.5]
-  -e1 ENTROPY_THRESHOLD1, --entropy1 ENTROPY_THRESHOLD1
-                        Minimum entropy threshold for the first dataset 
-                        [default = None]
-  -e2 ENTROPY_THRESHOLD2, --entropy2 ENTROPY_THRESHOLD2
-                        Minimum entropy threshold for the second dataset 
-                        [default = None]
-  --missing-char MISSING_CHAR
-                        defines missing characters
-                        [default = '']
-  --fill-missing {mean,median,most_frequent}
-                        defines missing strategy to fill missing data.
-                        For categorical data puts all missing data in one new category.
-  --missing-data-category
-                        To count the missing data as a category
-  --write-hypothesis-tree
-                        To write levels of hypothesis tree in the file
-  -t {log,sqrt,arcsin,arcsinh,}, --transform {log,sqrt,arcsin,arcsinh,}
-                        data transformation method 
-                        [default = '' ]
-```
